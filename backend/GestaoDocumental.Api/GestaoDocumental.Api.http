@@ -1,0 +1,6 @@
+@GestaoDocumental.Api_HostAddress = http://localhost:5171
+
+GET {{GestaoDocumental.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
