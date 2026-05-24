@@ -1,0 +1,26 @@
+# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# User files
+*.user
+*.suo
+
+# Logs
+*.log
+
+# Environment
+.env
+
+# Publish
+publish/
+
+# Docker
+docker-data/
+
+# OS
+Thumbs.db
+.DS_Store
