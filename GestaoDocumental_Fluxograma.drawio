@@ -1,0 +1,56 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="YbXP8CzGRwazLnPl83wR">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-3" edge="1" parent="1" source="yrHbILW-wQuKt2BtHFcr-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="yrHbILW-wQuKt2BtHFcr-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="60" width="120" x="490" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Dashboard (pagina inicio)" vertex="1">
+          <mxGeometry height="60" width="120" x="410" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-9" edge="1" parent="1" source="yrHbILW-wQuKt2BtHFcr-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="yrHbILW-wQuKt2BtHFcr-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="inicio" vertex="1">
+          <mxGeometry height="80" width="120" x="270" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="fim" vertex="1">
+          <mxGeometry height="80" width="120" x="280" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-11" edge="1" parent="1" source="yrHbILW-wQuKt2BtHFcr-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="yrHbILW-wQuKt2BtHFcr-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-14" edge="1" parent="1" source="yrHbILW-wQuKt2BtHFcr-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="250" />
+            </Array>
+            <mxPoint x="280" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-15" connectable="0" parent="yrHbILW-wQuKt2BtHFcr-14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Não" vertex="1">
+          <mxGeometry relative="1" x="-0.2667" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-6" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Autenticado?" vertex="1">
+          <mxGeometry height="80" width="80" x="290" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-10" edge="1" parent="1" source="yrHbILW-wQuKt2BtHFcr-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="yrHbILW-wQuKt2BtHFcr-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-8" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" value="User e Senha" vertex="1">
+          <mxGeometry height="60" width="120" x="270" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="yrHbILW-wQuKt2BtHFcr-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Sim" vertex="1">
+          <mxGeometry height="30" width="60" x="360" y="220" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
