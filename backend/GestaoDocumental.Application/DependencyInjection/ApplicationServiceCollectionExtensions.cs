@@ -35,6 +35,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IDocumentoHistoricoService, DocumentoHistoricoService>();
         services.AddScoped<IDocumentoAnexoService, DocumentoAnexoService>();
         services.AddScoped<IDocumentoService, DocumentoService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ITramitacaoDocumentoService, TramitacaoDocumentoService>();
 
         return services;

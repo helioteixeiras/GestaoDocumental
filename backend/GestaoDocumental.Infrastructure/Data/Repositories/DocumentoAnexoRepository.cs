@@ -18,7 +18,7 @@ public class DocumentoAnexoRepository
         int documentoId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        return await ActiveOnly(_dbSet)
             .Where(anexo => anexo.DocumentoId == documentoId)
             .OrderByDescending(anexo => anexo.DataUpload)
             .ThenByDescending(anexo => anexo.Id)
@@ -29,28 +29,57 @@ public class DocumentoAnexoRepository
         int documentoId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbSet.CountAsync(anexo => anexo.DocumentoId == documentoId, cancellationToken);
+        return await ActiveOnly(_dbSet)
+            .CountAsync(anexo => anexo.DocumentoId == documentoId, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<DocumentoAnexo>> GetByDocumentoIdAsync(
+    public Task<IReadOnlyList<DocumentoAnexo>> GetByDocumentoIdAsync(
         int documentoId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        return GetActiveByDocumentoIdAsync(documentoId, cancellationToken);
+    }
+
+    public Task<DocumentoAnexo?> GetByDocumentoIdAndAnexoIdAsync(
+        int documentoId,
+        int anexoId,
+        CancellationToken cancellationToken = default)
+    {
+        return GetActiveByDocumentoIdAndAnexoIdAsync(documentoId, anexoId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DocumentoAnexo>> GetActiveByDocumentoIdAsync(
+        int documentoId,
+        CancellationToken cancellationToken = default)
+    {
+        return await ActiveOnly(_dbSet)
             .Where(anexo => anexo.DocumentoId == documentoId)
             .OrderByDescending(anexo => anexo.DataUpload)
             .ThenByDescending(anexo => anexo.Id)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<DocumentoAnexo?> GetByDocumentoIdAndAnexoIdAsync(
+    public async Task<DocumentoAnexo?> GetActiveByDocumentoIdAndAnexoIdAsync(
         int documentoId,
         int anexoId,
         CancellationToken cancellationToken = default)
     {
-        return await _dbSet
+        return await ActiveOnly(_dbSet)
             .FirstOrDefaultAsync(
                 anexo => anexo.DocumentoId == documentoId && anexo.Id == anexoId,
                 cancellationToken);
     }
+
+    public Task SoftDeleteAsync(
+        DocumentoAnexo anexo,
+        CancellationToken cancellationToken = default)
+    {
+        anexo.Ativo = false;
+        anexo.DataAtualizacao = DateTime.UtcNow;
+        Update(anexo);
+        return Task.CompletedTask;
+    }
+
+    private static IQueryable<DocumentoAnexo> ActiveOnly(IQueryable<DocumentoAnexo> query) =>
+        query.Where(anexo => anexo.Ativo);
 }

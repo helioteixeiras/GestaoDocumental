@@ -1,6 +1,7 @@
 using GestaoDocumental.Application.Common;
 using GestaoDocumental.Application.DTOs.Documento;
 using GestaoDocumental.Application.Interfaces;
+using GestaoDocumental.Application.Models;
 using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Domain.Interfaces;
 using GestaoDocumental.Shared.Settings;
@@ -15,10 +16,15 @@ public class DocumentoService
     private const string UploadHistoricoAcao = "UploadArquivo";
     private const string DownloadHistoricoAcao = "DownloadArquivo";
     private const string DownloadVersaoHistoricoAcao = "DownloadArquivoVersao";
+    private const string RemocaoAnexoHistoricoAcao = "RemocaoAnexo";
+    private const int DefaultDownloadReportPage = 1;
+    private const int DefaultDownloadReportPageSize = 20;
+    private const int MaxDownloadReportPageSize = 100;
 
     private readonly IDocumentoWorkflowRepository _workflowRepository;
     private readonly IDocumentoAnexoRepository _anexoRepository;
     private readonly IFileStorageService _fileStorageService;
+    private readonly ICsvExportService _csvExportService;
     private readonly StorageSettings _storageSettings;
 
     public DocumentoService(
@@ -27,12 +33,14 @@ public class DocumentoService
         IDocumentoWorkflowRepository workflowRepository,
         IDocumentoAnexoRepository anexoRepository,
         IFileStorageService fileStorageService,
+        ICsvExportService csvExportService,
         IOptions<StorageSettings> storageSettings)
         : base(repository, unitOfWork)
     {
         _workflowRepository = workflowRepository;
         _anexoRepository = anexoRepository;
         _fileStorageService = fileStorageService;
+        _csvExportService = csvExportService;
         _storageSettings = storageSettings.Value;
     }
 
@@ -213,6 +221,46 @@ public class DocumentoService
             cancellationToken);
     }
 
+    public async Task<bool> RemoverAnexoAsync(
+        int documentoId,
+        int anexoId,
+        int usuarioSistemaId,
+        CancellationToken cancellationToken = default)
+    {
+        var documento = await Repository.GetByIdAsync(documentoId);
+        if (documento is null)
+        {
+            throw new KeyNotFoundException($"Documento '{documentoId}' não encontrado.");
+        }
+
+        var anexo = await _anexoRepository.GetActiveByDocumentoIdAndAnexoIdAsync(
+            documentoId,
+            anexoId,
+            cancellationToken);
+
+        if (anexo is null)
+        {
+            return false;
+        }
+
+        var versao = await ObterVersaoAnexoAsync(documentoId, anexoId, cancellationToken);
+        var agora = DateTime.UtcNow;
+
+        await _anexoRepository.SoftDeleteAsync(anexo, cancellationToken);
+
+        documento.DataAtualizacao = agora;
+        Repository.Update(documento);
+
+        await RegistrarHistoricoDocumentoAsync(
+            documento,
+            usuarioSistemaId,
+            RemocaoAnexoHistoricoAcao,
+            BuildObservacaoAnexo(anexo, versao),
+            cancellationToken);
+
+        return true;
+    }
+
     private async Task<DocumentoDownloadResultDto?> DownloadAnexoComAuditoriaAsync(
         Documento documento,
         DocumentoAnexo? anexo,
@@ -227,7 +275,7 @@ public class DocumentoService
         }
 
         var versao = await ObterVersaoAnexoAsync(documento.Id, anexo.Id, cancellationToken);
-        var observacao = BuildObservacaoDownload(anexo, versao);
+        var observacao = BuildObservacaoAnexo(anexo, versao);
 
         await RegistrarHistoricoDocumentoAsync(
             documento,
@@ -270,7 +318,7 @@ public class DocumentoService
         await UnitOfWork.SaveChangesAsync();
     }
 
-    private static string BuildObservacaoDownload(DocumentoAnexo anexo, int? versao)
+    private static string BuildObservacaoAnexo(DocumentoAnexo anexo, int? versao)
     {
         var partes = new List<string> { anexo.NomeOriginal, $"AnexoId={anexo.Id}" };
 
@@ -306,7 +354,7 @@ public class DocumentoService
         DocumentoAnexo? anexo,
         CancellationToken cancellationToken)
     {
-        if (anexo is null || string.IsNullOrWhiteSpace(anexo.Caminho))
+        if (anexo is null || !anexo.Ativo || string.IsNullOrWhiteSpace(anexo.Caminho))
         {
             return null;
         }
@@ -341,6 +389,87 @@ public class DocumentoService
         DateTime? dataFim,
         int? usuarioId,
         string? acao,
+        int? page = null,
+        int? pageSize = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (dataInicio.HasValue && dataFim.HasValue && dataInicio.Value > dataFim.Value)
+        {
+            throw new InvalidOperationException("dataInicio não pode ser maior que dataFim.");
+        }
+
+        var pagina = page ?? DefaultDownloadReportPage;
+        var tamanhoPagina = pageSize ?? DefaultDownloadReportPageSize;
+        ValidarPaginacaoRelatorioDownloads(pagina, tamanhoPagina);
+
+        var documento = await Repository.GetByIdAsync(documentoId);
+        if (documento is null)
+        {
+            throw new KeyNotFoundException($"Documento '{documentoId}' não encontrado.");
+        }
+
+        var totalDownloads = await _workflowRepository.CountDownloadHistoricoByDocumentoIdAsync(
+            documentoId,
+            dataInicio,
+            dataFim,
+            usuarioId,
+            acao,
+            cancellationToken);
+
+        var totalPages = totalDownloads == 0
+            ? 0
+            : (int)Math.Ceiling(totalDownloads / (double)tamanhoPagina);
+
+        var historicos = totalDownloads == 0
+            ? Array.Empty<DocumentoHistorico>()
+            : await _workflowRepository.GetDownloadHistoricoByDocumentoIdPagedAsync(
+                documentoId,
+                dataInicio,
+                dataFim,
+                usuarioId,
+                acao,
+                pagina,
+                tamanhoPagina,
+                cancellationToken);
+
+        var downloads = historicos
+            .Select(MapDownloadHistoricoItem)
+            .ToList();
+
+        return new DocumentoDownloadReportDto
+        {
+            DocumentoId = documentoId,
+            TotalDownloads = totalDownloads,
+            DataInicio = dataInicio,
+            DataFim = dataFim,
+            Page = pagina,
+            PageSize = tamanhoPagina,
+            TotalPages = totalPages,
+            HasNextPage = totalPages > 0 && pagina < totalPages,
+            HasPreviousPage = pagina > 1 && totalPages > 0,
+            Downloads = downloads
+        };
+    }
+
+    private static void ValidarPaginacaoRelatorioDownloads(int page, int pageSize)
+    {
+        if (page < 1)
+        {
+            throw new InvalidOperationException("page deve ser maior ou igual a 1.");
+        }
+
+        if (pageSize < 1 || pageSize > MaxDownloadReportPageSize)
+        {
+            throw new InvalidOperationException($"pageSize deve estar entre 1 e {MaxDownloadReportPageSize}.");
+        }
+    }
+
+    public async Task<FileExportResultDto> ExportarRelatorioDownloadsCsvAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
         CancellationToken cancellationToken = default)
     {
         if (dataInicio.HasValue && dataFim.HasValue && dataInicio.Value > dataFim.Value)
@@ -362,28 +491,172 @@ public class DocumentoService
             acao,
             cancellationToken);
 
-        var downloads = historicos
-            .Select(historico => new DocumentoDownloadReportItemDto
+        var headers = new[]
+        {
+            "HistoricoId",
+            "DataAcao",
+            "Acao",
+            "UsuarioId",
+            "UsuarioNome",
+            "AnexoId",
+            "Versao",
+            "HashSha256",
+            "Observacao"
+        };
+
+        var rows = historicos
+            .Select(historico =>
             {
-                HistoricoId = historico.Id,
-                DataAcao = historico.DataAcao,
-                Acao = historico.Acao,
-                Observacao = historico.Observacao,
-                UsuarioId = historico.UtilizadorId,
-                UsuarioNome = historico.Utilizador?.Nome,
-                AnexoId = DownloadHistoricoObservacaoParser.ExtractAnexoId(historico.Observacao),
-                Versao = DownloadHistoricoObservacaoParser.ExtractVersao(historico.Observacao),
-                HashSha256 = DownloadHistoricoObservacaoParser.ExtractHashSha256(historico.Observacao)
+                var item = MapDownloadHistoricoItem(historico);
+                return (IReadOnlyList<string?>)
+                [
+                    item.HistoricoId.ToString(),
+                    item.DataAcao.ToString("O"),
+                    item.Acao,
+                    item.UsuarioId.ToString(),
+                    item.UsuarioNome,
+                    item.AnexoId?.ToString(),
+                    item.Versao?.ToString(),
+                    item.HashSha256,
+                    item.Observacao
+                ];
             })
             .ToList();
 
-        return new DocumentoDownloadReportDto
+        var content = _csvExportService.BuildCsv(headers, rows);
+
+        return new FileExportResultDto
+        {
+            Content = content,
+            FileName = $"downloads-documento-{documentoId}-{DateTime.UtcNow:yyyyMMddHHmmss}.csv",
+            ContentType = "text/csv; charset=utf-8"
+        };
+    }
+
+    private static DocumentoDownloadReportItemDto MapDownloadHistoricoItem(DocumentoHistorico historico) =>
+        new()
+        {
+            HistoricoId = historico.Id,
+            DataAcao = historico.DataAcao,
+            Acao = historico.Acao,
+            Observacao = historico.Observacao,
+            UsuarioId = historico.UtilizadorId,
+            UsuarioNome = historico.Utilizador?.Nome,
+            AnexoId = DownloadHistoricoObservacaoParser.ExtractAnexoId(historico.Observacao),
+            Versao = DownloadHistoricoObservacaoParser.ExtractVersao(historico.Observacao),
+            HashSha256 = DownloadHistoricoObservacaoParser.ExtractHashSha256(historico.Observacao)
+        };
+
+    public async Task<DocumentoDownloadResumoDto> ObterResumoDownloadsAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        CancellationToken cancellationToken = default)
+    {
+        if (dataInicio.HasValue && dataFim.HasValue && dataInicio.Value > dataFim.Value)
+        {
+            throw new InvalidOperationException("dataInicio não pode ser maior que dataFim.");
+        }
+
+        var documento = await Repository.GetByIdAsync(documentoId);
+        if (documento is null)
+        {
+            throw new KeyNotFoundException($"Documento '{documentoId}' não encontrado.");
+        }
+
+        var historicos = await _workflowRepository.GetDownloadHistoricoByDocumentoIdAsync(
+            documentoId,
+            dataInicio,
+            dataFim,
+            usuarioId: null,
+            acao: null,
+            cancellationToken);
+
+        if (historicos.Count == 0)
+        {
+            return new DocumentoDownloadResumoDto
+            {
+                DocumentoId = documentoId,
+                TotalDownloads = 0,
+                DataInicio = dataInicio,
+                DataFim = dataFim
+            };
+        }
+
+        var downloadsPorAcao = historicos
+            .GroupBy(historico => historico.Acao)
+            .Select(grupo => new DownloadResumoPorAcaoDto
+            {
+                Acao = grupo.Key,
+                Total = grupo.Count()
+            })
+            .OrderByDescending(item => item.Total)
+            .ThenBy(item => item.Acao)
+            .ToList();
+
+        var downloadsPorUsuario = historicos
+            .GroupBy(historico => new
+            {
+                historico.UtilizadorId,
+                UsuarioNome = historico.Utilizador?.Nome
+            })
+            .Select(grupo => new DownloadResumoPorUsuarioDto
+            {
+                UsuarioId = grupo.Key.UtilizadorId,
+                UsuarioNome = grupo.Key.UsuarioNome,
+                Total = grupo.Count()
+            })
+            .OrderByDescending(item => item.Total)
+            .ThenBy(item => item.UsuarioNome)
+            .ToList();
+
+        var downloadsPorDia = historicos
+            .GroupBy(historico => historico.DataAcao.Date)
+            .Select(grupo => new DownloadResumoPorDiaDto
+            {
+                Data = grupo.Key,
+                Total = grupo.Count()
+            })
+            .OrderBy(item => item.Data)
+            .ToList();
+
+        var ficheirosMaisBaixados = historicos
+            .Select(historico => new
+            {
+                NomeOriginal = DownloadHistoricoObservacaoParser.ExtractNomeOriginal(historico.Observacao),
+                AnexoId = DownloadHistoricoObservacaoParser.ExtractAnexoId(historico.Observacao),
+                Versao = DownloadHistoricoObservacaoParser.ExtractVersao(historico.Observacao)
+            })
+            .GroupBy(item => new
+            {
+                item.NomeOriginal,
+                item.AnexoId,
+                item.Versao
+            })
+            .Select(grupo => new DownloadResumoPorFicheiroDto
+            {
+                NomeOriginal = grupo.Key.NomeOriginal,
+                AnexoId = grupo.Key.AnexoId,
+                Versao = grupo.Key.Versao,
+                Total = grupo.Count()
+            })
+            .OrderByDescending(item => item.Total)
+            .ThenByDescending(item => item.Versao)
+            .ThenBy(item => item.NomeOriginal)
+            .ToList();
+
+        return new DocumentoDownloadResumoDto
         {
             DocumentoId = documentoId,
-            TotalDownloads = downloads.Count,
+            TotalDownloads = historicos.Count,
+            PrimeiroDownload = historicos.Min(historico => historico.DataAcao),
+            UltimoDownload = historicos.Max(historico => historico.DataAcao),
             DataInicio = dataInicio,
             DataFim = dataFim,
-            Downloads = downloads
+            DownloadsPorAcao = downloadsPorAcao,
+            DownloadsPorUsuario = downloadsPorUsuario,
+            DownloadsPorDia = downloadsPorDia,
+            FicheirosMaisBaixados = ficheirosMaisBaixados
         };
     }
 

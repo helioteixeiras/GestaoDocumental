@@ -133,6 +133,49 @@ public class DocumentoWorkflowRepository : IDocumentoWorkflowRepository
         string? acao,
         CancellationToken cancellationToken = default)
     {
+        return await BuildDownloadHistoricoQuery(documentoId, dataInicio, dataFim, usuarioId, acao)
+            .OrderByDescending(historico => historico.DataAcao)
+            .ThenByDescending(historico => historico.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountDownloadHistoricoByDocumentoIdAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        CancellationToken cancellationToken = default)
+    {
+        return await BuildDownloadHistoricoQuery(documentoId, dataInicio, dataFim, usuarioId, acao)
+            .CountAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DocumentoHistorico>> GetDownloadHistoricoByDocumentoIdPagedAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        return await BuildDownloadHistoricoQuery(documentoId, dataInicio, dataFim, usuarioId, acao)
+            .OrderByDescending(historico => historico.DataAcao)
+            .ThenByDescending(historico => historico.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
+    private IQueryable<DocumentoHistorico> BuildDownloadHistoricoQuery(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao)
+    {
         var downloadAcoes = new[] { "DownloadArquivo", "DownloadArquivoVersao" };
 
         var query = _context.DocumentoHistoricos
@@ -167,9 +210,6 @@ public class DocumentoWorkflowRepository : IDocumentoWorkflowRepository
             query = query.Where(historico => historico.UtilizadorId == usuarioId.Value);
         }
 
-        return await query
-            .OrderByDescending(historico => historico.DataAcao)
-            .ThenByDescending(historico => historico.Id)
-            .ToListAsync(cancellationToken);
+        return query;
     }
 }

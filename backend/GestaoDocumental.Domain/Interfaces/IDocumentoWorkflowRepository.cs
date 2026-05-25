@@ -30,4 +30,22 @@ public interface IDocumentoWorkflowRepository
         int? usuarioId,
         string? acao,
         CancellationToken cancellationToken = default);
+
+    Task<int> CountDownloadHistoricoByDocumentoIdAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<DocumentoHistorico>> GetDownloadHistoricoByDocumentoIdPagedAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }

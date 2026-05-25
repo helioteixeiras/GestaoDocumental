@@ -20,4 +20,17 @@ public interface IDocumentoAnexoRepository : IGenericRepository<DocumentoAnexo>
         int documentoId,
         int anexoId,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<DocumentoAnexo>> GetActiveByDocumentoIdAsync(
+        int documentoId,
+        CancellationToken cancellationToken = default);
+
+    Task<DocumentoAnexo?> GetActiveByDocumentoIdAndAnexoIdAsync(
+        int documentoId,
+        int anexoId,
+        CancellationToken cancellationToken = default);
+
+    Task SoftDeleteAsync(
+        DocumentoAnexo anexo,
+        CancellationToken cancellationToken = default);
 }

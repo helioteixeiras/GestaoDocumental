@@ -43,4 +43,13 @@ public static partial class DownloadHistoricoObservacaoParser
         var match = HashRegex().Match(observacao);
         return match.Success ? match.Groups[1].Value.Trim() : null;
     }
+
+    public static string? ExtractNomeOriginal(string? observacao)
+    {
+        if (string.IsNullOrWhiteSpace(observacao))
+            return null;
+
+        var nomeOriginal = observacao.Split('|', 2)[0].Trim();
+        return string.IsNullOrWhiteSpace(nomeOriginal) ? null : nomeOriginal;
+    }
 }

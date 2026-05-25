@@ -1,6 +1,6 @@
 using GestaoDocumental.Application.DTOs.Documento;
+using GestaoDocumental.Application.Models;
 using GestaoDocumental.Domain.Entities.Legacy;
-
 namespace GestaoDocumental.Application.Interfaces;
 
 public interface IDocumentoService
@@ -39,6 +39,28 @@ public interface IDocumentoService
         CancellationToken cancellationToken = default);
 
     Task<DocumentoDownloadReportDto> ObterRelatorioDownloadsAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        int? page = null,
+        int? pageSize = null,
+        CancellationToken cancellationToken = default);
+
+    Task<DocumentoDownloadResumoDto> ObterResumoDownloadsAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> RemoverAnexoAsync(
+        int documentoId,
+        int anexoId,
+        int usuarioSistemaId,
+        CancellationToken cancellationToken = default);
+
+    Task<FileExportResultDto> ExportarRelatorioDownloadsCsvAsync(
         int documentoId,
         DateTime? dataInicio,
         DateTime? dataFim,

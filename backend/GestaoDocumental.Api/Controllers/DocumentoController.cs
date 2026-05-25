@@ -44,6 +44,44 @@ public class DocumentoController : ControllerBase
     }
 
     [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
+    [HttpGet("{id}/downloads/resumo")]
+    public async Task<ActionResult<DocumentoDownloadResumoDto>> GetDownloadsResumo(
+        int id,
+        [FromQuery] DateTime? dataInicio,
+        [FromQuery] DateTime? dataFim,
+        CancellationToken cancellationToken)
+    {
+        var result = await _service.ObterResumoDownloadsAsync(
+            id,
+            dataInicio,
+            dataFim,
+            cancellationToken);
+
+        return Ok(result);
+    }
+
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
+    [HttpGet("{id}/downloads/export/csv")]
+    public async Task<IActionResult> ExportDownloadsCsv(
+        int id,
+        [FromQuery] DateTime? dataInicio,
+        [FromQuery] DateTime? dataFim,
+        [FromQuery] int? usuarioId,
+        [FromQuery] string? acao,
+        CancellationToken cancellationToken)
+    {
+        var result = await _service.ExportarRelatorioDownloadsCsvAsync(
+            id,
+            dataInicio,
+            dataFim,
+            usuarioId,
+            acao,
+            cancellationToken);
+
+        return File(result.Content, result.ContentType, result.FileName);
+    }
+
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
     [HttpGet("{id}/downloads")]
     public async Task<ActionResult<DocumentoDownloadReportDto>> GetDownloadsReport(
         int id,
@@ -51,6 +89,8 @@ public class DocumentoController : ControllerBase
         [FromQuery] DateTime? dataFim,
         [FromQuery] int? usuarioId,
         [FromQuery] string? acao,
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
         CancellationToken cancellationToken)
     {
         var result = await _service.ObterRelatorioDownloadsAsync(
@@ -59,9 +99,27 @@ public class DocumentoController : ControllerBase
             dataFim,
             usuarioId,
             acao,
+            page,
+            pageSize,
             cancellationToken);
 
         return Ok(result);
+    }
+
+    [Authorize(Policy = AppPolicies.PodeGerirDocumentos)]
+    [HttpDelete("{id}/anexos/{anexoId}")]
+    public async Task<IActionResult> RemoverAnexo(int id, int anexoId, CancellationToken cancellationToken)
+    {
+        var removed = await _service.RemoverAnexoAsync(
+            id,
+            anexoId,
+            GetUsuarioSistemaId(),
+            cancellationToken);
+
+        if (!removed)
+            return NotFound();
+
+        return NoContent();
     }
 
     [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
