@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using GestaoDocumental.Infrastructure.Data.Context;
 using GestaoDocumental.Api.Mappings;
@@ -7,6 +8,7 @@ using GestaoDocumental.Application.DependencyInjection;
 using GestaoDocumental.Infrastructure.Security;
 using FluentValidation.AspNetCore;
 using GestaoDocumental.Api.Middlewares;
+using GestaoDocumental.Shared.Security;
 using GestaoDocumental.Shared.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -29,6 +31,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -38,11 +41,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwtSettings.Issuer,
             ValidAudience = jwtSettings.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            NameClaimType = ClaimTypes.Name,
+            RoleClaimType = ClaimTypes.Role
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AppPolicies.AdministradorOnly, policy =>
+        policy.RequireRole(AppRoles.Administrador));
+
+    options.AddPolicy(AppPolicies.PodeGerirUsuarios, policy =>
+        policy.RequireRole(AppRoles.Administrador));
+
+    options.AddPolicy(AppPolicies.PodeGerirDocumentos, policy =>
+        policy.RequireRole(AppRoles.Administrador, AppRoles.Operador));
+
+    options.AddPolicy(AppPolicies.PodeConsultarDocumentos, policy =>
+        policy.RequireRole(AppRoles.Administrador, AppRoles.Operador, AppRoles.Consulta));
+
+    options.AddPolicy(AppPolicies.PodeAprovarDocumentos, policy =>
+        policy.RequireRole(AppRoles.Administrador, AppRoles.Operador));
+});
 
 builder.Services.AddEndpointsApiExplorer();
 

@@ -2,6 +2,7 @@
 using GestaoDocumental.Api.DTOs.Documento;
 using GestaoDocumental.Application.Interfaces;
 using GestaoDocumental.Domain.Entities.Legacy;
+using GestaoDocumental.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,7 @@ public class DocumentoController : ControllerBase
         _mapper = mapper;
     }
 
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DocumentoListDto>>> GetAll()
     {
@@ -28,6 +30,7 @@ public class DocumentoController : ControllerBase
         return Ok(_mapper.Map<IEnumerable<DocumentoListDto>>(entities));
     }
 
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
     [HttpGet("{id}")]
     public async Task<ActionResult<DocumentoDetailsDto>> GetById(int id)
     {
@@ -39,6 +42,7 @@ public class DocumentoController : ControllerBase
         return Ok(_mapper.Map<DocumentoDetailsDto>(entity));
     }
 
+    [Authorize(Policy = AppPolicies.PodeGerirDocumentos)]
     [HttpPost]
     public async Task<ActionResult<DocumentoDetailsDto>> Post(DocumentoCreateDto dto)
     {
@@ -49,6 +53,7 @@ public class DocumentoController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = createdEntity.Id }, result);
     }
 
+    [Authorize(Policy = AppPolicies.PodeGerirDocumentos)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, DocumentoUpdateDto dto)
     {
@@ -61,6 +66,7 @@ public class DocumentoController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = AppPolicies.PodeGerirDocumentos)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

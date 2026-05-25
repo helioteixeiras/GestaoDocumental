@@ -2,12 +2,13 @@
 using GestaoDocumental.Api.DTOs.UsuarioSistema;
 using GestaoDocumental.Application.Interfaces;
 using GestaoDocumental.Domain.Entities.Legacy;
+using GestaoDocumental.Shared.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GestaoDocumental.Api.Controllers;
 
-[Authorize]
+[Authorize(Policy = AppPolicies.PodeGerirUsuarios)]
 [ApiController]
 [Route("api/[controller]")]
 public class UsuarioSistemaController : ControllerBase
