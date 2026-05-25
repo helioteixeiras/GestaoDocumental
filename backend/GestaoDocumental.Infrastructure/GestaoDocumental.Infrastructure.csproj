@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\GestaoDocumental.Domain\GestaoDocumental.Domain.csproj" />
+    <ProjectReference Include="..\GestaoDocumental.Application\GestaoDocumental.Application.csproj" />
+    <ProjectReference Include="..\GestaoDocumental.Shared\GestaoDocumental.Shared.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
