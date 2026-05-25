@@ -81,6 +81,13 @@ public class GlobalExceptionMiddleware
                     : keyNotFoundException.Message,
                 null),
 
+            InvalidOperationException invalidOperationException => (
+                StatusCodes.Status400BadRequest,
+                string.IsNullOrWhiteSpace(invalidOperationException.Message)
+                    ? "Invalid operation."
+                    : invalidOperationException.Message,
+                null),
+
             UnauthorizedAccessException unauthorizedAccessException => (
                 StatusCodes.Status401Unauthorized,
                 string.IsNullOrWhiteSpace(unauthorizedAccessException.Message)

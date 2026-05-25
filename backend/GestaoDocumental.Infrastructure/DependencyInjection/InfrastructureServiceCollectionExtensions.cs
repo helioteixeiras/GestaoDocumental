@@ -12,6 +12,7 @@ public static class InfrastructureServiceCollectionExtensions
     {
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IUsuarioSistemaRepository, UsuarioSistemaRepository>();
+        services.AddScoped<IDocumentoWorkflowRepository, DocumentoWorkflowRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
