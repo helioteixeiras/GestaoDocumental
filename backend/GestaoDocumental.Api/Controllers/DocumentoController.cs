@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GestaoDocumental.Api.DTOs.Documento;
+using GestaoDocumental.Application.DTOs.Documento;
 using GestaoDocumental.Application.Interfaces;
 using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Shared.Security;
@@ -28,6 +29,14 @@ public class DocumentoController : ControllerBase
     {
         var entities = await _service.GetAllAsync();
         return Ok(_mapper.Map<IEnumerable<DocumentoListDto>>(entities));
+    }
+
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
+    [HttpGet("{id}/workflow")]
+    public async Task<ActionResult<DocumentoWorkflowTimelineDto>> GetWorkflow(int id)
+    {
+        var result = await _service.ObterWorkflowDocumentoAsync(id);
+        return Ok(result);
     }
 
     [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]

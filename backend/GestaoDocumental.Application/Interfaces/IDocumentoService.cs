@@ -1,3 +1,4 @@
+using GestaoDocumental.Application.DTOs.Documento;
 using GestaoDocumental.Domain.Entities.Legacy;
 
 namespace GestaoDocumental.Application.Interfaces;
@@ -9,4 +10,8 @@ public interface IDocumentoService
     Task<Documento> CreateAsync(Documento entity);
     Task<bool> UpdateAsync(int id, Documento entity);
     Task<bool> DeleteAsync(int id);
+
+    Task<DocumentoWorkflowTimelineDto> ObterWorkflowDocumentoAsync(
+        int documentoId,
+        CancellationToken cancellationToken = default);
 }

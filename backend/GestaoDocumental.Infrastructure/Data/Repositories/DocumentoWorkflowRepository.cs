@@ -1,5 +1,6 @@
 using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Domain.Interfaces;
+using GestaoDocumental.Domain.ReadModels;
 using GestaoDocumental.Infrastructure.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,42 @@ public class DocumentoWorkflowRepository : IDocumentoWorkflowRepository
         return await _context.Documentos
             .Include(documento => documento.EstadoDocumento)
             .FirstOrDefaultAsync(documento => documento.Id == documentoId, cancellationToken);
+    }
+
+    public async Task<DocumentoWorkflowReadModel?> GetWorkflowByDocumentoIdAsync(
+        int documentoId,
+        CancellationToken cancellationToken = default)
+    {
+        var documento = await _context.Documentos
+            .Include(item => item.EstadoDocumento)
+            .FirstOrDefaultAsync(item => item.Id == documentoId, cancellationToken);
+
+        if (documento is null)
+            return null;
+
+        var historicos = await _context.DocumentoHistoricos
+            .Include(item => item.Utilizador)
+            .Where(item => item.DocumentoId == documentoId)
+            .OrderBy(item => item.DataAcao)
+            .ThenBy(item => item.Id)
+            .ToListAsync(cancellationToken);
+
+        var tramitacoes = await _context.TramitacaoDocumentos
+            .Include(item => item.ColaboradorOrigem)
+            .Include(item => item.ColaboradorDestino)
+            .Include(item => item.DirecaoOrigem)
+            .Include(item => item.DirecaoDestino)
+            .Where(item => item.DocumentoId == documentoId)
+            .OrderBy(item => item.DataEnvio)
+            .ThenBy(item => item.Id)
+            .ToListAsync(cancellationToken);
+
+        return new DocumentoWorkflowReadModel
+        {
+            Documento = documento,
+            Historicos = historicos,
+            Tramitacoes = tramitacoes
+        };
     }
 
     public async Task<UsuarioSistema?> GetUsuarioAsync(

@@ -1,10 +1,15 @@
 using GestaoDocumental.Domain.Entities.Legacy;
+using GestaoDocumental.Domain.ReadModels;
 
 namespace GestaoDocumental.Domain.Interfaces;
 
 public interface IDocumentoWorkflowRepository
 {
     Task<Documento?> GetDocumentoAsync(int documentoId, CancellationToken cancellationToken = default);
+
+    Task<DocumentoWorkflowReadModel?> GetWorkflowByDocumentoIdAsync(
+        int documentoId,
+        CancellationToken cancellationToken = default);
 
     Task<UsuarioSistema?> GetUsuarioAsync(int usuarioId, CancellationToken cancellationToken = default);
 
