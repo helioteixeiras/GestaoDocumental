@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using GestaoDocumental.Api.Database;
-using GestaoDocumental.Api.Database.Entities;
+using GestaoDocumental.Infrastructure.Data.Context;
+using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.Municipio;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

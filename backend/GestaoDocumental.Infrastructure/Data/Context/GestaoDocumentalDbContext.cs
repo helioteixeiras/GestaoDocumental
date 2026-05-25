@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using GestaoDocumental.Domain.Entities.Legacy;
+﻿using GestaoDocumental.Domain.Entities.Legacy;
 using Microsoft.EntityFrameworkCore;
 
-namespace GestaoDocumental.Api.Database;
+namespace GestaoDocumental.Infrastructure.Data.Context;
 
 public partial class GestaoDocumentalDbContext : DbContext
 {

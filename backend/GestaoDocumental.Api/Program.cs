@@ -1,4 +1,4 @@
-using GestaoDocumental.Api.Database;
+using GestaoDocumental.Infrastructure.Data.Context;
 using GestaoDocumental.Api.Mappings;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +17,13 @@ builder.Services.AddDbContext<GestaoDocumentalDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var mapper = scope.ServiceProvider.GetRequiredService<AutoMapper.IMapper>();
+
+    mapper.ConfigurationProvider.AssertConfigurationIsValid();
+}
 
 if (app.Environment.IsDevelopment())
 {

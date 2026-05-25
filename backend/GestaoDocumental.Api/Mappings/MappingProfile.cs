@@ -1,5 +1,5 @@
 using AutoMapper;
-using GestaoDocumental.Api.Database.Entities;
+using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.ClassificacaoDocumento;
 using GestaoDocumental.Api.DTOs.Colaborador;
 using GestaoDocumental.Api.DTOs.Departamento;

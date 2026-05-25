@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GestaoDocumental.Api.Database.Entities;
+namespace GestaoDocumental.Domain.Entities.Legacy;
 
-public partial class Genero
+public partial class TipoDocumentoColaborador
 {
     public int Id { get; set; }
 
