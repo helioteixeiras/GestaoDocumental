@@ -36,6 +36,26 @@ public class DocumentoController : ControllerBase
     }
 
     [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
+    [HttpGet("{id}/anexos")]
+    public async Task<ActionResult<DocumentoAnexoListDto>> ListAnexos(int id, CancellationToken cancellationToken)
+    {
+        var result = await _service.ListarAnexosAsync(id, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
+    [HttpGet("{id}/anexos/{anexoId}/download")]
+    public async Task<IActionResult> DownloadAnexo(int id, int anexoId, CancellationToken cancellationToken)
+    {
+        var result = await _service.DownloadAnexoAsync(id, anexoId, cancellationToken);
+
+        if (result is null)
+            return NotFound();
+
+        return File(result.Content, result.ContentType, result.FileName);
+    }
+
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
     [HttpGet("{id}/download")]
     public async Task<IActionResult> Download(int id, CancellationToken cancellationToken)
     {

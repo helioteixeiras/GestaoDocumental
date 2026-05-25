@@ -11,4 +11,13 @@ public interface IDocumentoAnexoRepository : IGenericRepository<DocumentoAnexo>
     Task<int> CountByDocumentoIdAsync(
         int documentoId,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<DocumentoAnexo>> GetByDocumentoIdAsync(
+        int documentoId,
+        CancellationToken cancellationToken = default);
+
+    Task<DocumentoAnexo?> GetByDocumentoIdAndAnexoIdAsync(
+        int documentoId,
+        int anexoId,
+        CancellationToken cancellationToken = default);
 }

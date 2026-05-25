@@ -122,7 +122,93 @@ public class DocumentoService
         }
 
         var anexo = await _anexoRepository.GetLatestByDocumentoIdAsync(documentoId, cancellationToken);
+        return await OpenAnexoDownloadAsync(anexo, cancellationToken);
+    }
+
+    public async Task<DocumentoAnexoListDto> ListarAnexosAsync(
+        int documentoId,
+        CancellationToken cancellationToken = default)
+    {
+        var documento = await Repository.GetByIdAsync(documentoId);
+        if (documento is null)
+        {
+            throw new KeyNotFoundException($"Documento '{documentoId}' não encontrado.");
+        }
+
+        var anexos = await _anexoRepository.GetByDocumentoIdAsync(documentoId, cancellationToken);
+        if (anexos.Count == 0)
+        {
+            return new DocumentoAnexoListDto
+            {
+                DocumentoId = documentoId,
+                TotalAnexos = 0,
+                UltimaVersao = null,
+                Anexos = []
+            };
+        }
+
+        var versoesPorId = anexos
+            .OrderBy(anexo => anexo.DataUpload)
+            .ThenBy(anexo => anexo.Id)
+            .Select((anexo, index) => (anexo.Id, Versao: index + 1))
+            .ToDictionary(item => item.Id, item => item.Versao);
+
+        var ultimoAnexoId = anexos[0].Id;
+        var ultimaVersao = versoesPorId[ultimoAnexoId];
+
+        var itens = anexos.Select(anexo => new DocumentoAnexoListItemDto
+        {
+            Id = anexo.Id,
+            DocumentoId = anexo.DocumentoId,
+            NomeOriginal = anexo.NomeOriginal,
+            Extensao = anexo.Extensao,
+            Tamanho = anexo.Tamanho ?? 0,
+            TamanhoFormatado = FileSizeFormatter.Format(anexo.Tamanho ?? 0),
+            HashSha256 = anexo.HashSha256,
+            DataUpload = anexo.DataUpload,
+            Versao = versoesPorId[anexo.Id],
+            EhUltimaVersao = anexo.Id == ultimoAnexoId,
+            DownloadUrl = $"/api/Documento/{documentoId}/anexos/{anexo.Id}/download"
+        }).ToList();
+
+        return new DocumentoAnexoListDto
+        {
+            DocumentoId = documentoId,
+            TotalAnexos = itens.Count,
+            UltimaVersao = ultimaVersao,
+            Anexos = itens
+        };
+    }
+
+    public async Task<DocumentoDownloadResultDto?> DownloadAnexoAsync(
+        int documentoId,
+        int anexoId,
+        CancellationToken cancellationToken = default)
+    {
+        var documento = await Repository.GetByIdAsync(documentoId);
+        if (documento is null)
+        {
+            return null;
+        }
+
+        var anexo = await _anexoRepository.GetByDocumentoIdAndAnexoIdAsync(
+            documentoId,
+            anexoId,
+            cancellationToken);
+
+        return await OpenAnexoDownloadAsync(anexo, cancellationToken);
+    }
+
+    private async Task<DocumentoDownloadResultDto?> OpenAnexoDownloadAsync(
+        DocumentoAnexo? anexo,
+        CancellationToken cancellationToken)
+    {
         if (anexo is null || string.IsNullOrWhiteSpace(anexo.Caminho))
+        {
+            return null;
+        }
+
+        if (!await _fileStorageService.ExistsAsync(anexo.Caminho, cancellationToken))
         {
             return null;
         }
