@@ -114,7 +114,7 @@ using (var scope = app.Services.CreateScope())
     mapper.ConfigurationProvider.AssertConfigurationIsValid();
 }
 
-await IdentityDataSeeder.SeedAdminAsync(app.Services);
+await IdentityDataSeeder.SeedAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
