@@ -1,41 +1,40 @@
 ﻿using AutoMapper;
-using GestaoDocumental.Infrastructure.Data.Context;
-using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.Municipio;
+using GestaoDocumental.Application.Interfaces;
+using GestaoDocumental.Domain.Entities.Legacy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GestaoDocumental.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class MunicipioController : ControllerBase
 {
-    private readonly GestaoDocumentalDbContext _context;
+    private readonly IMunicipioService _service;
     private readonly IMapper _mapper;
 
-    public MunicipioController(GestaoDocumentalDbContext context, IMapper mapper)
+    public MunicipioController(IMunicipioService service, IMapper mapper)
     {
-        _context = context;
+        _service = service;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MunicipioListDto>>> GetAll()
     {
-        var entities = await _context.Municipios.ToListAsync();
+        var entities = await _service.GetAllAsync();
         return Ok(_mapper.Map<IEnumerable<MunicipioListDto>>(entities));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<MunicipioDetailsDto>> GetById(int id)
     {
-        var entity = await _context.Municipios.FindAsync(id);
+        var entity = await _service.GetByIdAsync(id);
 
         if (entity == null)
-        {
             return NotFound();
-        }
 
         return Ok(_mapper.Map<MunicipioDetailsDto>(entity));
     }
@@ -44,27 +43,20 @@ public class MunicipioController : ControllerBase
     public async Task<ActionResult<MunicipioDetailsDto>> Post(MunicipioCreateDto dto)
     {
         var entity = _mapper.Map<Municipio>(dto);
+        var createdEntity = await _service.CreateAsync(entity);
+        var result = _mapper.Map<MunicipioDetailsDto>(createdEntity);
 
-        _context.Municipios.Add(entity);
-        await _context.SaveChangesAsync();
-
-        var result = _mapper.Map<MunicipioDetailsDto>(entity);
-
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = createdEntity.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, MunicipioUpdateDto dto)
     {
-        var entity = await _context.Municipios.FindAsync(id);
+        var entity = _mapper.Map<Municipio>(dto);
+        var updated = await _service.UpdateAsync(id, entity);
 
-        if (entity == null)
-        {
+        if (!updated)
             return NotFound();
-        }
-
-        _mapper.Map(dto, entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -72,15 +64,10 @@ public class MunicipioController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var entity = await _context.Municipios.FindAsync(id);
+        var deleted = await _service.DeleteAsync(id);
 
-        if (entity == null)
-        {
+        if (!deleted)
             return NotFound();
-        }
-
-        _context.Municipios.Remove(entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

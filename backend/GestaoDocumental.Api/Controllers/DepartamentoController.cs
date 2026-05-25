@@ -1,41 +1,40 @@
 ﻿using AutoMapper;
-using GestaoDocumental.Infrastructure.Data.Context;
-using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.Departamento;
+using GestaoDocumental.Application.Interfaces;
+using GestaoDocumental.Domain.Entities.Legacy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GestaoDocumental.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class DepartamentoController : ControllerBase
 {
-    private readonly GestaoDocumentalDbContext _context;
+    private readonly IDepartamentoService _service;
     private readonly IMapper _mapper;
 
-    public DepartamentoController(GestaoDocumentalDbContext context, IMapper mapper)
+    public DepartamentoController(IDepartamentoService service, IMapper mapper)
     {
-        _context = context;
+        _service = service;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DepartamentoListDto>>> GetAll()
     {
-        var entities = await _context.Departamentos.ToListAsync();
+        var entities = await _service.GetAllAsync();
         return Ok(_mapper.Map<IEnumerable<DepartamentoListDto>>(entities));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<DepartamentoDetailsDto>> GetById(int id)
     {
-        var entity = await _context.Departamentos.FindAsync(id);
+        var entity = await _service.GetByIdAsync(id);
 
         if (entity == null)
-        {
             return NotFound();
-        }
 
         return Ok(_mapper.Map<DepartamentoDetailsDto>(entity));
     }
@@ -44,27 +43,20 @@ public class DepartamentoController : ControllerBase
     public async Task<ActionResult<DepartamentoDetailsDto>> Post(DepartamentoCreateDto dto)
     {
         var entity = _mapper.Map<Departamento>(dto);
+        var createdEntity = await _service.CreateAsync(entity);
+        var result = _mapper.Map<DepartamentoDetailsDto>(createdEntity);
 
-        _context.Departamentos.Add(entity);
-        await _context.SaveChangesAsync();
-
-        var result = _mapper.Map<DepartamentoDetailsDto>(entity);
-
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = createdEntity.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, DepartamentoUpdateDto dto)
     {
-        var entity = await _context.Departamentos.FindAsync(id);
+        var entity = _mapper.Map<Departamento>(dto);
+        var updated = await _service.UpdateAsync(id, entity);
 
-        if (entity == null)
-        {
+        if (!updated)
             return NotFound();
-        }
-
-        _mapper.Map(dto, entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -72,15 +64,10 @@ public class DepartamentoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var entity = await _context.Departamentos.FindAsync(id);
+        var deleted = await _service.DeleteAsync(id);
 
-        if (entity == null)
-        {
+        if (!deleted)
             return NotFound();
-        }
-
-        _context.Departamentos.Remove(entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

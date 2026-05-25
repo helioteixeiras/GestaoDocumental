@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
+using GestaoDocumental.Domain.Common;
 
 namespace GestaoDocumental.Domain.Entities.Legacy;
 
-public partial class Provincia
+public partial class Provincia : BaseEntity
 {
-    public int Id { get; set; }
-
     public string Nome { get; set; } = null!;
 
     public int PaisId { get; set; }

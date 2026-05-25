@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GestaoDocumental.Domain.Common;
 
 namespace GestaoDocumental.Domain.Entities.Legacy;
 
-public partial class DocumentoHistorico
+public partial class DocumentoHistorico : BaseEntity
 {
-    public int Id { get; set; }
-
     public int DocumentoId { get; set; }
 
     public int UtilizadorId { get; set; }

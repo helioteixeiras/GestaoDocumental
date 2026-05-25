@@ -1,41 +1,40 @@
 ﻿using AutoMapper;
-using GestaoDocumental.Infrastructure.Data.Context;
-using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.EstadoColaborador;
+using GestaoDocumental.Application.Interfaces;
+using GestaoDocumental.Domain.Entities.Legacy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GestaoDocumental.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class EstadoColaboradorController : ControllerBase
 {
-    private readonly GestaoDocumentalDbContext _context;
+    private readonly IEstadoColaboradorService _service;
     private readonly IMapper _mapper;
 
-    public EstadoColaboradorController(GestaoDocumentalDbContext context, IMapper mapper)
+    public EstadoColaboradorController(IEstadoColaboradorService service, IMapper mapper)
     {
-        _context = context;
+        _service = service;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<EstadoColaboradorListDto>>> GetAll()
     {
-        var entities = await _context.EstadoColaboradors.ToListAsync();
+        var entities = await _service.GetAllAsync();
         return Ok(_mapper.Map<IEnumerable<EstadoColaboradorListDto>>(entities));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<EstadoColaboradorDetailsDto>> GetById(int id)
     {
-        var entity = await _context.EstadoColaboradors.FindAsync(id);
+        var entity = await _service.GetByIdAsync(id);
 
         if (entity == null)
-        {
             return NotFound();
-        }
 
         return Ok(_mapper.Map<EstadoColaboradorDetailsDto>(entity));
     }
@@ -44,27 +43,20 @@ public class EstadoColaboradorController : ControllerBase
     public async Task<ActionResult<EstadoColaboradorDetailsDto>> Post(EstadoColaboradorCreateDto dto)
     {
         var entity = _mapper.Map<EstadoColaborador>(dto);
+        var createdEntity = await _service.CreateAsync(entity);
+        var result = _mapper.Map<EstadoColaboradorDetailsDto>(createdEntity);
 
-        _context.EstadoColaboradors.Add(entity);
-        await _context.SaveChangesAsync();
-
-        var result = _mapper.Map<EstadoColaboradorDetailsDto>(entity);
-
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = createdEntity.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, EstadoColaboradorUpdateDto dto)
     {
-        var entity = await _context.EstadoColaboradors.FindAsync(id);
+        var entity = _mapper.Map<EstadoColaborador>(dto);
+        var updated = await _service.UpdateAsync(id, entity);
 
-        if (entity == null)
-        {
+        if (!updated)
             return NotFound();
-        }
-
-        _mapper.Map(dto, entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -72,15 +64,10 @@ public class EstadoColaboradorController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var entity = await _context.EstadoColaboradors.FindAsync(id);
+        var deleted = await _service.DeleteAsync(id);
 
-        if (entity == null)
-        {
+        if (!deleted)
             return NotFound();
-        }
-
-        _context.EstadoColaboradors.Remove(entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

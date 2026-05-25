@@ -406,16 +406,22 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("UsuarioSistema");
 
-            entity.HasIndex(e => e.ColaboradorId, "UQ__UsuarioS__28AA72205B486489").IsUnique();
+            entity.HasIndex(e => e.ColaboradorId, "UQ__UsuarioS__28AA72205B486489")
+                .IsUnique()
+                .HasFilter("[ColaboradorId] IS NOT NULL");
 
             entity.HasIndex(e => e.Username, "UQ__UsuarioS__536C85E4126F4AB7").IsUnique();
+
+            entity.HasIndex(e => e.Email, "UQ_UsuarioSistema_Email").IsUnique();
 
             entity.Property(e => e.Ativo).HasDefaultValue(true);
             entity.Property(e => e.Bloqueado).HasDefaultValue(false);
             entity.Property(e => e.DataCriacao).HasColumnType("datetime");
+            entity.Property(e => e.Email).HasMaxLength(150);
             entity.Property(e => e.PasswordHash).HasMaxLength(500);
-            entity.Property(e => e.PasswordSalt).HasMaxLength(500);
-            entity.Property(e => e.TentativasFalhadas).HasDefaultValue(0);
+            entity.Property(e => e.TentativasLogin)
+                .HasColumnName("TentativasFalhadas")
+                .HasDefaultValue(0);
             entity.Property(e => e.UltimoLogin).HasColumnType("datetime");
             entity.Property(e => e.Username).HasMaxLength(100);
 
@@ -428,6 +434,11 @@ public partial class GestaoDocumentalDbContext : DbContext
                 .HasForeignKey(d => d.EstadoLoginId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__UsuarioSi__Estad__5CD6CB2B");
+
+            entity.HasOne(d => d.Perfil).WithMany(p => p.UsuarioSistemas)
+                .HasForeignKey(d => d.PerfilId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UsuarioSistema_Perfil");
         });
 
         OnModelCreatingPartial(modelBuilder);

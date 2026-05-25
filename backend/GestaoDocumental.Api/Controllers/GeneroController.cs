@@ -1,41 +1,40 @@
 ﻿using AutoMapper;
-using GestaoDocumental.Infrastructure.Data.Context;
-using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.Genero;
+using GestaoDocumental.Application.Interfaces;
+using GestaoDocumental.Domain.Entities.Legacy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GestaoDocumental.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class GeneroController : ControllerBase
 {
-    private readonly GestaoDocumentalDbContext _context;
+    private readonly IGeneroService _service;
     private readonly IMapper _mapper;
 
-    public GeneroController(GestaoDocumentalDbContext context, IMapper mapper)
+    public GeneroController(IGeneroService service, IMapper mapper)
     {
-        _context = context;
+        _service = service;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GeneroListDto>>> GetAll()
     {
-        var entities = await _context.Generos.ToListAsync();
+        var entities = await _service.GetAllAsync();
         return Ok(_mapper.Map<IEnumerable<GeneroListDto>>(entities));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<GeneroDetailsDto>> GetById(int id)
     {
-        var entity = await _context.Generos.FindAsync(id);
+        var entity = await _service.GetByIdAsync(id);
 
         if (entity == null)
-        {
             return NotFound();
-        }
 
         return Ok(_mapper.Map<GeneroDetailsDto>(entity));
     }
@@ -44,27 +43,20 @@ public class GeneroController : ControllerBase
     public async Task<ActionResult<GeneroDetailsDto>> Post(GeneroCreateDto dto)
     {
         var entity = _mapper.Map<Genero>(dto);
+        var createdEntity = await _service.CreateAsync(entity);
+        var result = _mapper.Map<GeneroDetailsDto>(createdEntity);
 
-        _context.Generos.Add(entity);
-        await _context.SaveChangesAsync();
-
-        var result = _mapper.Map<GeneroDetailsDto>(entity);
-
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = createdEntity.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, GeneroUpdateDto dto)
     {
-        var entity = await _context.Generos.FindAsync(id);
+        var entity = _mapper.Map<Genero>(dto);
+        var updated = await _service.UpdateAsync(id, entity);
 
-        if (entity == null)
-        {
+        if (!updated)
             return NotFound();
-        }
-
-        _mapper.Map(dto, entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -72,15 +64,10 @@ public class GeneroController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var entity = await _context.Generos.FindAsync(id);
+        var deleted = await _service.DeleteAsync(id);
 
-        if (entity == null)
-        {
+        if (!deleted)
             return NotFound();
-        }
-
-        _context.Generos.Remove(entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

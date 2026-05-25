@@ -1,41 +1,40 @@
 using AutoMapper;
-using GestaoDocumental.Infrastructure.Data.Context;
-using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.TipoDocumento;
+using GestaoDocumental.Application.Interfaces;
+using GestaoDocumental.Domain.Entities.Legacy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GestaoDocumental.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class TipoDocumentoController : ControllerBase
 {
-    private readonly GestaoDocumentalDbContext _context;
+    private readonly ITipoDocumentoService _service;
     private readonly IMapper _mapper;
 
-    public TipoDocumentoController(GestaoDocumentalDbContext context, IMapper mapper)
+    public TipoDocumentoController(ITipoDocumentoService service, IMapper mapper)
     {
-        _context = context;
+        _service = service;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TipoDocumentoListDto>>> GetAll()
     {
-        var entities = await _context.TipoDocumentos.ToListAsync();
+        var entities = await _service.GetAllAsync();
         return Ok(_mapper.Map<IEnumerable<TipoDocumentoListDto>>(entities));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<TipoDocumentoDetailsDto>> GetById(int id)
     {
-        var entity = await _context.TipoDocumentos.FindAsync(id);
+        var entity = await _service.GetByIdAsync(id);
 
         if (entity == null)
-        {
             return NotFound();
-        }
 
         return Ok(_mapper.Map<TipoDocumentoDetailsDto>(entity));
     }
@@ -44,27 +43,20 @@ public class TipoDocumentoController : ControllerBase
     public async Task<ActionResult<TipoDocumentoDetailsDto>> Post(TipoDocumentoCreateDto dto)
     {
         var entity = _mapper.Map<TipoDocumento>(dto);
+        var createdEntity = await _service.CreateAsync(entity);
+        var result = _mapper.Map<TipoDocumentoDetailsDto>(createdEntity);
 
-        _context.TipoDocumentos.Add(entity);
-        await _context.SaveChangesAsync();
-
-        var result = _mapper.Map<TipoDocumentoDetailsDto>(entity);
-
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = createdEntity.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, TipoDocumentoUpdateDto dto)
     {
-        var entity = await _context.TipoDocumentos.FindAsync(id);
+        var entity = _mapper.Map<TipoDocumento>(dto);
+        var updated = await _service.UpdateAsync(id, entity);
 
-        if (entity == null)
-        {
+        if (!updated)
             return NotFound();
-        }
-
-        _mapper.Map(dto, entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -72,15 +64,10 @@ public class TipoDocumentoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var entity = await _context.TipoDocumentos.FindAsync(id);
+        var deleted = await _service.DeleteAsync(id);
 
-        if (entity == null)
-        {
+        if (!deleted)
             return NotFound();
-        }
-
-        _context.TipoDocumentos.Remove(entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

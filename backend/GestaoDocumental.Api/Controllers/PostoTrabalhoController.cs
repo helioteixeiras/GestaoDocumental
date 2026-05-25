@@ -1,41 +1,40 @@
 ﻿using AutoMapper;
-using GestaoDocumental.Infrastructure.Data.Context;
-using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.PostoTrabalho;
+using GestaoDocumental.Application.Interfaces;
+using GestaoDocumental.Domain.Entities.Legacy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GestaoDocumental.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PostoTrabalhoController : ControllerBase
 {
-    private readonly GestaoDocumentalDbContext _context;
+    private readonly IPostoTrabalhoService _service;
     private readonly IMapper _mapper;
 
-    public PostoTrabalhoController(GestaoDocumentalDbContext context, IMapper mapper)
+    public PostoTrabalhoController(IPostoTrabalhoService service, IMapper mapper)
     {
-        _context = context;
+        _service = service;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PostoTrabalhoListDto>>> GetAll()
     {
-        var entities = await _context.PostoTrabalhos.ToListAsync();
+        var entities = await _service.GetAllAsync();
         return Ok(_mapper.Map<IEnumerable<PostoTrabalhoListDto>>(entities));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<PostoTrabalhoDetailsDto>> GetById(int id)
     {
-        var entity = await _context.PostoTrabalhos.FindAsync(id);
+        var entity = await _service.GetByIdAsync(id);
 
         if (entity == null)
-        {
             return NotFound();
-        }
 
         return Ok(_mapper.Map<PostoTrabalhoDetailsDto>(entity));
     }
@@ -44,27 +43,20 @@ public class PostoTrabalhoController : ControllerBase
     public async Task<ActionResult<PostoTrabalhoDetailsDto>> Post(PostoTrabalhoCreateDto dto)
     {
         var entity = _mapper.Map<PostoTrabalho>(dto);
+        var createdEntity = await _service.CreateAsync(entity);
+        var result = _mapper.Map<PostoTrabalhoDetailsDto>(createdEntity);
 
-        _context.PostoTrabalhos.Add(entity);
-        await _context.SaveChangesAsync();
-
-        var result = _mapper.Map<PostoTrabalhoDetailsDto>(entity);
-
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = createdEntity.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, PostoTrabalhoUpdateDto dto)
     {
-        var entity = await _context.PostoTrabalhos.FindAsync(id);
+        var entity = _mapper.Map<PostoTrabalho>(dto);
+        var updated = await _service.UpdateAsync(id, entity);
 
-        if (entity == null)
-        {
+        if (!updated)
             return NotFound();
-        }
-
-        _mapper.Map(dto, entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -72,15 +64,10 @@ public class PostoTrabalhoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var entity = await _context.PostoTrabalhos.FindAsync(id);
+        var deleted = await _service.DeleteAsync(id);
 
-        if (entity == null)
-        {
+        if (!deleted)
             return NotFound();
-        }
-
-        _context.PostoTrabalhos.Remove(entity);
-        await _context.SaveChangesAsync();
 
         return NoContent();
     }

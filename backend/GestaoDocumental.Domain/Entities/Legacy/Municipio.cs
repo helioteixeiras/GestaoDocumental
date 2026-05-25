@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GestaoDocumental.Domain.Common;
 
 namespace GestaoDocumental.Domain.Entities.Legacy;
 
-public partial class Municipio
+public partial class Municipio : BaseEntity
 {
-    public int Id { get; set; }
-
     public string Nome { get; set; } = null!;
 
     public int ProvinciaId { get; set; }

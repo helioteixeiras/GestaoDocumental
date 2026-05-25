@@ -1,0 +1,11 @@
+O que isso significa arquiteturalmente
+
+Tu já tens praticamente:
+
+✅ Clean Architecture simplificada
+✅ Repository Pattern
+✅ UnitOfWork
+✅ Generic Repository
+✅ Generic Service
+✅ DI modular
+✅ Controllers desacoplados do EF

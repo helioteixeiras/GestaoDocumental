@@ -1,4 +1,4 @@
-﻿namespace GestaoDocumental.Api.DTOs.ClassificacaoDocumento;
+namespace GestaoDocumental.Api.DTOs.ClassificacaoDocumento;
 
 public class ClassificacaoDocumentoCreateDto
 {

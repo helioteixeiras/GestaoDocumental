@@ -1,4 +1,5 @@
 using AutoMapper;
+using GestaoDocumental.Domain.Common;
 using GestaoDocumental.Domain.Entities.Legacy;
 using GestaoDocumental.Api.DTOs.ClassificacaoDocumento;
 using GestaoDocumental.Api.DTOs.Colaborador;
@@ -51,14 +52,25 @@ public class MappingProfile : Profile
         ConfigureUsuarioSistemaMaps();
     }
 
+    private static IMappingExpression<TSource, TDestination> IgnoreBaseEntityAuditFields<TSource, TDestination>(
+        IMappingExpression<TSource, TDestination> mapping)
+        where TDestination : BaseEntity
+    {
+        return mapping
+            .ForMember(dest => dest.DataCriacao, opt => opt.Ignore())
+            .ForMember(dest => dest.DataAtualizacao, opt => opt.Ignore())
+            .ForMember(dest => dest.Ativo, opt => opt.Ignore());
+    }
+
     private void ConfigureClassificacaoDocumentoMaps()
     {
         CreateMap<ClassificacaoDocumento, ClassificacaoDocumentoListDto>();
         CreateMap<ClassificacaoDocumento, ClassificacaoDocumentoDetailsDto>();
 
-        CreateMap<ClassificacaoDocumentoCreateDto, ClassificacaoDocumento>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Documentos, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<ClassificacaoDocumentoCreateDto, ClassificacaoDocumento>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Documentos, opt => opt.Ignore()));
 
         CreateMap<ClassificacaoDocumentoUpdateDto, ClassificacaoDocumento>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -71,20 +83,21 @@ public class MappingProfile : Profile
         CreateMap<Colaborador, ColaboradorListDto>();
         CreateMap<Colaborador, ColaboradorDetailsDto>();
 
-        CreateMap<ColaboradorCreateDto, Colaborador>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.DocumentoColaboradorCriadors, opt => opt.Ignore())
-            .ForMember(dest => dest.DocumentoHistoricos, opt => opt.Ignore())
-            .ForMember(dest => dest.DocumentoUtilizadorAtualizacaos, opt => opt.Ignore())
-            .ForMember(dest => dest.Estado, opt => opt.Ignore())
-            .ForMember(dest => dest.Genero, opt => opt.Ignore())
-            .ForMember(dest => dest.Nacionalidade, opt => opt.Ignore())
-            .ForMember(dest => dest.Perfil, opt => opt.Ignore())
-            .ForMember(dest => dest.PostoTrabalho, opt => opt.Ignore())
-            .ForMember(dest => dest.TipoDocumentoColaborador, opt => opt.Ignore())
-            .ForMember(dest => dest.TramitacaoDocumentoColaboradorDestinos, opt => opt.Ignore())
-            .ForMember(dest => dest.TramitacaoDocumentoColaboradorOrigems, opt => opt.Ignore())
-            .ForMember(dest => dest.UsuarioSistema, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<ColaboradorCreateDto, Colaborador>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.DocumentoColaboradorCriadors, opt => opt.Ignore())
+                .ForMember(dest => dest.DocumentoHistoricos, opt => opt.Ignore())
+                .ForMember(dest => dest.DocumentoUtilizadorAtualizacaos, opt => opt.Ignore())
+                .ForMember(dest => dest.Estado, opt => opt.Ignore())
+                .ForMember(dest => dest.Genero, opt => opt.Ignore())
+                .ForMember(dest => dest.Nacionalidade, opt => opt.Ignore())
+                .ForMember(dest => dest.Perfil, opt => opt.Ignore())
+                .ForMember(dest => dest.PostoTrabalho, opt => opt.Ignore())
+                .ForMember(dest => dest.TipoDocumentoColaborador, opt => opt.Ignore())
+                .ForMember(dest => dest.TramitacaoDocumentoColaboradorDestinos, opt => opt.Ignore())
+                .ForMember(dest => dest.TramitacaoDocumentoColaboradorOrigems, opt => opt.Ignore())
+                .ForMember(dest => dest.UsuarioSistema, opt => opt.Ignore()));
 
         CreateMap<ColaboradorUpdateDto, Colaborador>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -107,10 +120,11 @@ public class MappingProfile : Profile
         CreateMap<Departamento, DepartamentoListDto>();
         CreateMap<Departamento, DepartamentoDetailsDto>();
 
-        CreateMap<DepartamentoCreateDto, Departamento>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Direcao, opt => opt.Ignore())
-            .ForMember(dest => dest.PostoTrabalhos, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<DepartamentoCreateDto, Departamento>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Direcao, opt => opt.Ignore())
+                .ForMember(dest => dest.PostoTrabalhos, opt => opt.Ignore()));
 
         CreateMap<DepartamentoUpdateDto, Departamento>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -124,12 +138,13 @@ public class MappingProfile : Profile
         CreateMap<Direcao, DirecaoListDto>();
         CreateMap<Direcao, DirecaoDetailsDto>();
 
-        CreateMap<DirecaoCreateDto, Direcao>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Departamentos, opt => opt.Ignore())
-            .ForMember(dest => dest.Documentos, opt => opt.Ignore())
-            .ForMember(dest => dest.TramitacaoDocumentoDirecaoDestinos, opt => opt.Ignore())
-            .ForMember(dest => dest.TramitacaoDocumentoDirecaoOrigems, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<DirecaoCreateDto, Direcao>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Departamentos, opt => opt.Ignore())
+                .ForMember(dest => dest.Documentos, opt => opt.Ignore())
+                .ForMember(dest => dest.TramitacaoDocumentoDirecaoDestinos, opt => opt.Ignore())
+                .ForMember(dest => dest.TramitacaoDocumentoDirecaoOrigems, opt => opt.Ignore()));
 
         CreateMap<DirecaoUpdateDto, Direcao>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -145,22 +160,21 @@ public class MappingProfile : Profile
         CreateMap<Documento, DocumentoListDto>();
         CreateMap<Documento, DocumentoDetailsDto>();
 
-        CreateMap<DocumentoCreateDto, Documento>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.DataCriacao, opt => opt.Ignore())
-            .ForMember(dest => dest.DataAtualizacao, opt => opt.Ignore())
-            .ForMember(dest => dest.VersaoAtual, opt => opt.Ignore())
-            .ForMember(dest => dest.UtilizadorAtualizacaoId, opt => opt.Ignore())
-            .ForMember(dest => dest.Classificacao, opt => opt.Ignore())
-            .ForMember(dest => dest.ColaboradorCriador, opt => opt.Ignore())
-            .ForMember(dest => dest.DirecaoOrigem, opt => opt.Ignore())
-            .ForMember(dest => dest.DocumentoAnexos, opt => opt.Ignore())
-            .ForMember(dest => dest.DocumentoHistoricos, opt => opt.Ignore())
-            .ForMember(dest => dest.EstadoDocumento, opt => opt.Ignore())
-            .ForMember(dest => dest.Fornecedor, opt => opt.Ignore())
-            .ForMember(dest => dest.TipoDocumento, opt => opt.Ignore())
-            .ForMember(dest => dest.TramitacaoDocumentos, opt => opt.Ignore())
-            .ForMember(dest => dest.UtilizadorAtualizacao, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<DocumentoCreateDto, Documento>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.VersaoAtual, opt => opt.Ignore())
+                .ForMember(dest => dest.UtilizadorAtualizacaoId, opt => opt.Ignore())
+                .ForMember(dest => dest.Classificacao, opt => opt.Ignore())
+                .ForMember(dest => dest.ColaboradorCriador, opt => opt.Ignore())
+                .ForMember(dest => dest.DirecaoOrigem, opt => opt.Ignore())
+                .ForMember(dest => dest.DocumentoAnexos, opt => opt.Ignore())
+                .ForMember(dest => dest.DocumentoHistoricos, opt => opt.Ignore())
+                .ForMember(dest => dest.EstadoDocumento, opt => opt.Ignore())
+                .ForMember(dest => dest.Fornecedor, opt => opt.Ignore())
+                .ForMember(dest => dest.TipoDocumento, opt => opt.Ignore())
+                .ForMember(dest => dest.TramitacaoDocumentos, opt => opt.Ignore())
+                .ForMember(dest => dest.UtilizadorAtualizacao, opt => opt.Ignore()));
 
         CreateMap<DocumentoUpdateDto, Documento>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -186,14 +200,15 @@ public class MappingProfile : Profile
         CreateMap<DocumentoAnexo, DocumentoAnexoListDto>();
         CreateMap<DocumentoAnexo, DocumentoAnexoDetailsDto>();
 
-        CreateMap<DocumentoAnexoCreateDto, DocumentoAnexo>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.GuidFicheiro, opt => opt.Ignore())
-            .ForMember(dest => dest.NomeFisico, opt => opt.Ignore())
-            .ForMember(dest => dest.Caminho, opt => opt.Ignore())
-            .ForMember(dest => dest.HashSha256, opt => opt.Ignore())
-            .ForMember(dest => dest.DataUpload, opt => opt.Ignore())
-            .ForMember(dest => dest.Documento, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<DocumentoAnexoCreateDto, DocumentoAnexo>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.GuidFicheiro, opt => opt.Ignore())
+                .ForMember(dest => dest.NomeFisico, opt => opt.Ignore())
+                .ForMember(dest => dest.Caminho, opt => opt.Ignore())
+                .ForMember(dest => dest.HashSha256, opt => opt.Ignore())
+                .ForMember(dest => dest.DataUpload, opt => opt.Ignore())
+                .ForMember(dest => dest.Documento, opt => opt.Ignore()));
 
         CreateMap<DocumentoAnexoUpdateDto, DocumentoAnexo>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -212,12 +227,13 @@ public class MappingProfile : Profile
         CreateMap<DocumentoHistorico, DocumentoHistoricoListDto>();
         CreateMap<DocumentoHistorico, DocumentoHistoricoDetailsDto>();
 
-        CreateMap<DocumentoHistoricoCreateDto, DocumentoHistorico>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.UtilizadorId, opt => opt.Ignore())
-            .ForMember(dest => dest.DataAcao, opt => opt.Ignore())
-            .ForMember(dest => dest.Documento, opt => opt.Ignore())
-            .ForMember(dest => dest.Utilizador, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<DocumentoHistoricoCreateDto, DocumentoHistorico>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UtilizadorId, opt => opt.Ignore())
+                .ForMember(dest => dest.DataAcao, opt => opt.Ignore())
+                .ForMember(dest => dest.Documento, opt => opt.Ignore())
+                .ForMember(dest => dest.Utilizador, opt => opt.Ignore()));
 
         CreateMap<DocumentoHistoricoUpdateDto, DocumentoHistorico>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -233,9 +249,10 @@ public class MappingProfile : Profile
         CreateMap<EstadoColaborador, EstadoColaboradorListDto>();
         CreateMap<EstadoColaborador, EstadoColaboradorDetailsDto>();
 
-        CreateMap<EstadoColaboradorCreateDto, EstadoColaborador>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Colaboradors, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<EstadoColaboradorCreateDto, EstadoColaborador>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Colaboradors, opt => opt.Ignore()));
 
         CreateMap<EstadoColaboradorUpdateDto, EstadoColaborador>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -248,9 +265,10 @@ public class MappingProfile : Profile
         CreateMap<EstadoDocumento, EstadoDocumentoListDto>();
         CreateMap<EstadoDocumento, EstadoDocumentoDetailsDto>();
 
-        CreateMap<EstadoDocumentoCreateDto, EstadoDocumento>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Documentos, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<EstadoDocumentoCreateDto, EstadoDocumento>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Documentos, opt => opt.Ignore()));
 
         CreateMap<EstadoDocumentoUpdateDto, EstadoDocumento>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -263,9 +281,10 @@ public class MappingProfile : Profile
         CreateMap<EstadoLogin, EstadoLoginListDto>();
         CreateMap<EstadoLogin, EstadoLoginDetailsDto>();
 
-        CreateMap<EstadoLoginCreateDto, EstadoLogin>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.UsuarioSistemas, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<EstadoLoginCreateDto, EstadoLogin>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UsuarioSistemas, opt => opt.Ignore()));
 
         CreateMap<EstadoLoginUpdateDto, EstadoLogin>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -278,9 +297,10 @@ public class MappingProfile : Profile
         CreateMap<Fornecedor, FornecedorListDto>();
         CreateMap<Fornecedor, FornecedorDetailsDto>();
 
-        CreateMap<FornecedorCreateDto, Fornecedor>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Documentos, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<FornecedorCreateDto, Fornecedor>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Documentos, opt => opt.Ignore()));
 
         CreateMap<FornecedorUpdateDto, Fornecedor>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -293,9 +313,10 @@ public class MappingProfile : Profile
         CreateMap<Genero, GeneroListDto>();
         CreateMap<Genero, GeneroDetailsDto>();
 
-        CreateMap<GeneroCreateDto, Genero>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Colaboradors, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<GeneroCreateDto, Genero>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Colaboradors, opt => opt.Ignore()));
 
         CreateMap<GeneroUpdateDto, Genero>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -308,10 +329,11 @@ public class MappingProfile : Profile
         CreateMap<Municipio, MunicipioListDto>();
         CreateMap<Municipio, MunicipioDetailsDto>();
 
-        CreateMap<MunicipioCreateDto, Municipio>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.PostoTrabalhos, opt => opt.Ignore())
-            .ForMember(dest => dest.Provincia, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<MunicipioCreateDto, Municipio>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PostoTrabalhos, opt => opt.Ignore())
+                .ForMember(dest => dest.Provincia, opt => opt.Ignore()));
 
         CreateMap<MunicipioUpdateDto, Municipio>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -325,10 +347,11 @@ public class MappingProfile : Profile
         CreateMap<Pais, PaisListDto>();
         CreateMap<Pais, PaisDetailsDto>();
 
-        CreateMap<PaisCreateDto, Pais>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Colaboradors, opt => opt.Ignore())
-            .ForMember(dest => dest.Provincia, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<PaisCreateDto, Pais>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Colaboradors, opt => opt.Ignore())
+                .ForMember(dest => dest.Provincia, opt => opt.Ignore()));
 
         CreateMap<PaisUpdateDto, Pais>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -342,13 +365,16 @@ public class MappingProfile : Profile
         CreateMap<Perfil, PerfilListDto>();
         CreateMap<Perfil, PerfilDetailsDto>();
 
-        CreateMap<PerfilCreateDto, Perfil>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Colaboradors, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<PerfilCreateDto, Perfil>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Colaboradors, opt => opt.Ignore())
+                .ForMember(dest => dest.UsuarioSistemas, opt => opt.Ignore()));
 
         CreateMap<PerfilUpdateDto, Perfil>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Colaboradors, opt => opt.Ignore())
+            .ForMember(dest => dest.UsuarioSistemas, opt => opt.Ignore())
             .ReverseMap();
     }
 
@@ -357,11 +383,12 @@ public class MappingProfile : Profile
         CreateMap<PostoTrabalho, PostoTrabalhoListDto>();
         CreateMap<PostoTrabalho, PostoTrabalhoDetailsDto>();
 
-        CreateMap<PostoTrabalhoCreateDto, PostoTrabalho>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Colaboradors, opt => opt.Ignore())
-            .ForMember(dest => dest.Departamento, opt => opt.Ignore())
-            .ForMember(dest => dest.Municipio, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<PostoTrabalhoCreateDto, PostoTrabalho>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Colaboradors, opt => opt.Ignore())
+                .ForMember(dest => dest.Departamento, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipio, opt => opt.Ignore()));
 
         CreateMap<PostoTrabalhoUpdateDto, PostoTrabalho>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -376,10 +403,11 @@ public class MappingProfile : Profile
         CreateMap<Provincia, ProvinciaListDto>();
         CreateMap<Provincia, ProvinciaDetailsDto>();
 
-        CreateMap<ProvinciaCreateDto, Provincia>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Municipios, opt => opt.Ignore())
-            .ForMember(dest => dest.Pais, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<ProvinciaCreateDto, Provincia>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipios, opt => opt.Ignore())
+                .ForMember(dest => dest.Pais, opt => opt.Ignore()));
 
         CreateMap<ProvinciaUpdateDto, Provincia>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -393,9 +421,10 @@ public class MappingProfile : Profile
         CreateMap<TipoDocumento, TipoDocumentoListDto>();
         CreateMap<TipoDocumento, TipoDocumentoDetailsDto>();
 
-        CreateMap<TipoDocumentoCreateDto, TipoDocumento>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Documentos, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<TipoDocumentoCreateDto, TipoDocumento>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Documentos, opt => opt.Ignore()));
 
         CreateMap<TipoDocumentoUpdateDto, TipoDocumento>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -408,9 +437,10 @@ public class MappingProfile : Profile
         CreateMap<TipoDocumentoColaborador, TipoDocumentoColaboradorListDto>();
         CreateMap<TipoDocumentoColaborador, TipoDocumentoColaboradorDetailsDto>();
 
-        CreateMap<TipoDocumentoColaboradorCreateDto, TipoDocumentoColaborador>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Colaboradors, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<TipoDocumentoColaboradorCreateDto, TipoDocumentoColaborador>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Colaboradors, opt => opt.Ignore()));
 
         CreateMap<TipoDocumentoColaboradorUpdateDto, TipoDocumentoColaborador>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -423,15 +453,16 @@ public class MappingProfile : Profile
         CreateMap<TramitacaoDocumento, TramitacaoDocumentoListDto>();
         CreateMap<TramitacaoDocumento, TramitacaoDocumentoDetailsDto>();
 
-        CreateMap<TramitacaoDocumentoCreateDto, TramitacaoDocumento>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.DataEnvio, opt => opt.Ignore())
-            .ForMember(dest => dest.DataRececao, opt => opt.Ignore())
-            .ForMember(dest => dest.ColaboradorDestino, opt => opt.Ignore())
-            .ForMember(dest => dest.ColaboradorOrigem, opt => opt.Ignore())
-            .ForMember(dest => dest.DirecaoDestino, opt => opt.Ignore())
-            .ForMember(dest => dest.DirecaoOrigem, opt => opt.Ignore())
-            .ForMember(dest => dest.Documento, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<TramitacaoDocumentoCreateDto, TramitacaoDocumento>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.DataEnvio, opt => opt.Ignore())
+                .ForMember(dest => dest.DataRececao, opt => opt.Ignore())
+                .ForMember(dest => dest.ColaboradorDestino, opt => opt.Ignore())
+                .ForMember(dest => dest.ColaboradorOrigem, opt => opt.Ignore())
+                .ForMember(dest => dest.DirecaoDestino, opt => opt.Ignore())
+                .ForMember(dest => dest.DirecaoOrigem, opt => opt.Ignore())
+                .ForMember(dest => dest.Documento, opt => opt.Ignore()));
 
         CreateMap<TramitacaoDocumentoUpdateDto, TramitacaoDocumento>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -451,26 +482,30 @@ public class MappingProfile : Profile
         CreateMap<UsuarioSistema, UsuarioSistemaListDto>();
         CreateMap<UsuarioSistema, UsuarioSistemaDetailsDto>();
 
-        CreateMap<UsuarioSistemaCreateDto, UsuarioSistema>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-            .ForMember(dest => dest.PasswordSalt, opt => opt.Ignore())
-            .ForMember(dest => dest.TentativasFalhadas, opt => opt.Ignore())
-            .ForMember(dest => dest.Bloqueado, opt => opt.Ignore())
-            .ForMember(dest => dest.UltimoLogin, opt => opt.Ignore())
-            .ForMember(dest => dest.DataCriacao, opt => opt.Ignore())
-            .ForMember(dest => dest.Colaborador, opt => opt.Ignore())
-            .ForMember(dest => dest.EstadoLogin, opt => opt.Ignore());
+        IgnoreBaseEntityAuditFields(
+            CreateMap<UsuarioSistemaCreateDto, UsuarioSistema>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Email, opt => opt.Ignore())
+                .ForMember(dest => dest.PerfilId, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.TentativasLogin, opt => opt.Ignore())
+                .ForMember(dest => dest.Bloqueado, opt => opt.Ignore())
+                .ForMember(dest => dest.UltimoLogin, opt => opt.Ignore())
+                .ForMember(dest => dest.Colaborador, opt => opt.Ignore())
+                .ForMember(dest => dest.Perfil, opt => opt.Ignore())
+                .ForMember(dest => dest.EstadoLogin, opt => opt.Ignore()));
 
         CreateMap<UsuarioSistemaUpdateDto, UsuarioSistema>(MemberList.Source)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.ColaboradorId, opt => opt.Ignore())
+            .ForMember(dest => dest.Email, opt => opt.Ignore())
+            .ForMember(dest => dest.PerfilId, opt => opt.Ignore())
             .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-            .ForMember(dest => dest.PasswordSalt, opt => opt.Ignore())
-            .ForMember(dest => dest.TentativasFalhadas, opt => opt.Ignore())
+            .ForMember(dest => dest.TentativasLogin, opt => opt.Ignore())
             .ForMember(dest => dest.UltimoLogin, opt => opt.Ignore())
             .ForMember(dest => dest.DataCriacao, opt => opt.Ignore())
             .ForMember(dest => dest.Colaborador, opt => opt.Ignore())
+            .ForMember(dest => dest.Perfil, opt => opt.Ignore())
             .ForMember(dest => dest.EstadoLogin, opt => opt.Ignore());
     }
 }

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GestaoDocumental.Domain.Common;
 
 namespace GestaoDocumental.Domain.Entities.Legacy;
 
-public partial class EstadoLogin
+public partial class EstadoLogin : BaseEntity
 {
-    public int Id { get; set; }
-
     public string Nome { get; set; } = null!;
 
     public virtual ICollection<UsuarioSistema> UsuarioSistemas { get; set; } = new List<UsuarioSistema>();

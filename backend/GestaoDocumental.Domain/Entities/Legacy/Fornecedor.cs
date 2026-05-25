@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GestaoDocumental.Domain.Common;
 
 namespace GestaoDocumental.Domain.Entities.Legacy;
 
-public partial class Fornecedor
+public partial class Fornecedor : BaseEntity
 {
-    public int Id { get; set; }
-
     public string Nome { get; set; } = null!;
 
     public string? Nif { get; set; }

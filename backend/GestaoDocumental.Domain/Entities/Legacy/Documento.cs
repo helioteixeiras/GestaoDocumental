@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using GestaoDocumental.Domain.Common;
 
 namespace GestaoDocumental.Domain.Entities.Legacy;
 
-public partial class Documento
+public partial class Documento : BaseEntity
 {
-    public int Id { get; set; }
-
     public string NumeroDocumento { get; set; } = null!;
 
     public string Titulo { get; set; } = null!;
@@ -25,8 +22,6 @@ public partial class Documento
 
     public int? FornecedorId { get; set; }
 
-    public DateTime DataCriacao { get; set; }
-
     public DateTime? DataDocumento { get; set; }
 
     public DateTime? DataRecepcao { get; set; }
@@ -44,8 +39,6 @@ public partial class Documento
     public string? LocalizacaoFisica { get; set; }
 
     public string? CodigoArquivo { get; set; }
-
-    public DateTime? DataAtualizacao { get; set; }
 
     public int? UtilizadorAtualizacaoId { get; set; }
 
