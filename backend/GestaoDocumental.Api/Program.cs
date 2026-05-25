@@ -19,6 +19,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection(JwtSettings.SectionName));
 
+builder.Services.Configure<StorageSettings>(
+    builder.Configuration.GetSection(StorageSettings.SectionName));
+
 var jwtSettings = builder.Configuration
     .GetSection(JwtSettings.SectionName)
     .Get<JwtSettings>() ?? throw new InvalidOperationException("JwtSettings configuration is missing.");

@@ -14,4 +14,16 @@ public interface IDocumentoService
     Task<DocumentoWorkflowTimelineDto> ObterWorkflowDocumentoAsync(
         int documentoId,
         CancellationToken cancellationToken = default);
+
+    Task<DocumentoUploadResultDto> UploadArquivoAsync(
+        int documentoId,
+        int usuarioSistemaId,
+        string fileName,
+        long fileLength,
+        Stream content,
+        CancellationToken cancellationToken = default);
+
+    Task<DocumentoDownloadResultDto?> DownloadArquivoAsync(
+        int documentoId,
+        CancellationToken cancellationToken = default);
 }

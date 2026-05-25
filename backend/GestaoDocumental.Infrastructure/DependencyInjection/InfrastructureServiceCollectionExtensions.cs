@@ -1,7 +1,9 @@
+using GestaoDocumental.Application.Interfaces;
 using GestaoDocumental.Application.Interfaces.Auth;
 using GestaoDocumental.Domain.Interfaces;
 using GestaoDocumental.Infrastructure.Data.Repositories;
 using GestaoDocumental.Infrastructure.Security;
+using GestaoDocumental.Infrastructure.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GestaoDocumental.Infrastructure.DependencyInjection;
@@ -12,7 +14,9 @@ public static class InfrastructureServiceCollectionExtensions
     {
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IUsuarioSistemaRepository, UsuarioSistemaRepository>();
+        services.AddScoped<IDocumentoAnexoRepository, DocumentoAnexoRepository>();
         services.AddScoped<IDocumentoWorkflowRepository, DocumentoWorkflowRepository>();
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();

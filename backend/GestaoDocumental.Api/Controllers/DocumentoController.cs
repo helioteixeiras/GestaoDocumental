@@ -1,5 +1,9 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
+using FluentValidation;
+using FluentValidation.Results;
 using GestaoDocumental.Api.DTOs.Documento;
+using GestaoDocumental.Application.Common;
 using GestaoDocumental.Application.DTOs.Documento;
 using GestaoDocumental.Application.Interfaces;
 using GestaoDocumental.Domain.Entities.Legacy;
@@ -29,6 +33,47 @@ public class DocumentoController : ControllerBase
     {
         var entities = await _service.GetAllAsync();
         return Ok(_mapper.Map<IEnumerable<DocumentoListDto>>(entities));
+    }
+
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
+    [HttpGet("{id}/download")]
+    public async Task<IActionResult> Download(int id, CancellationToken cancellationToken)
+    {
+        var result = await _service.DownloadArquivoAsync(id, cancellationToken);
+
+        if (result is null)
+            return NotFound();
+
+        return File(result.Content, result.ContentType, result.FileName);
+    }
+
+    [Authorize(Policy = AppPolicies.PodeGerirDocumentos)]
+    [HttpPost("{id}/upload")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 10 * 1024 * 1024)]
+    public async Task<ActionResult<DocumentoUploadResultDto>> Upload(
+        int id,
+        IFormFile? file,
+        CancellationToken cancellationToken)
+    {
+        if (file is null)
+        {
+            throw new ValidationException(new[]
+            {
+                new ValidationFailure(DocumentoFileValidator.FileFieldName, "Ficheiro é obrigatório.")
+            });
+        }
+
+        await using var stream = file.OpenReadStream();
+        var result = await _service.UploadArquivoAsync(
+            id,
+            GetUsuarioSistemaId(),
+            file.FileName,
+            file.Length,
+            stream,
+            cancellationToken);
+
+        return Ok(result);
     }
 
     [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
@@ -85,5 +130,17 @@ public class DocumentoController : ControllerBase
             return NotFound();
 
         return NoContent();
+    }
+
+    private int GetUsuarioSistemaId()
+    {
+        var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(claim) || !int.TryParse(claim, out var usuarioId))
+        {
+            throw new UnauthorizedAccessException("Identificador do utilizador autenticado inválido.");
+        }
+
+        return usuarioId;
     }
 }
