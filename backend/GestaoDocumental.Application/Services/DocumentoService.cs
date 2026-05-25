@@ -335,6 +335,58 @@ public class DocumentoService
         };
     }
 
+    public async Task<DocumentoDownloadReportDto> ObterRelatorioDownloadsAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        CancellationToken cancellationToken = default)
+    {
+        if (dataInicio.HasValue && dataFim.HasValue && dataInicio.Value > dataFim.Value)
+        {
+            throw new InvalidOperationException("dataInicio não pode ser maior que dataFim.");
+        }
+
+        var documento = await Repository.GetByIdAsync(documentoId);
+        if (documento is null)
+        {
+            throw new KeyNotFoundException($"Documento '{documentoId}' não encontrado.");
+        }
+
+        var historicos = await _workflowRepository.GetDownloadHistoricoByDocumentoIdAsync(
+            documentoId,
+            dataInicio,
+            dataFim,
+            usuarioId,
+            acao,
+            cancellationToken);
+
+        var downloads = historicos
+            .Select(historico => new DocumentoDownloadReportItemDto
+            {
+                HistoricoId = historico.Id,
+                DataAcao = historico.DataAcao,
+                Acao = historico.Acao,
+                Observacao = historico.Observacao,
+                UsuarioId = historico.UtilizadorId,
+                UsuarioNome = historico.Utilizador?.Nome,
+                AnexoId = DownloadHistoricoObservacaoParser.ExtractAnexoId(historico.Observacao),
+                Versao = DownloadHistoricoObservacaoParser.ExtractVersao(historico.Observacao),
+                HashSha256 = DownloadHistoricoObservacaoParser.ExtractHashSha256(historico.Observacao)
+            })
+            .ToList();
+
+        return new DocumentoDownloadReportDto
+        {
+            DocumentoId = documentoId,
+            TotalDownloads = downloads.Count,
+            DataInicio = dataInicio,
+            DataFim = dataFim,
+            Downloads = downloads
+        };
+    }
+
     public async Task<DocumentoWorkflowTimelineDto> ObterWorkflowDocumentoAsync(
         int documentoId,
         CancellationToken cancellationToken = default)

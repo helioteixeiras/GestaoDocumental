@@ -124,4 +124,52 @@ public class DocumentoWorkflowRepository : IDocumentoWorkflowRepository
         _context.Documentos.Update(documento);
         return Task.CompletedTask;
     }
+
+    public async Task<IReadOnlyList<DocumentoHistorico>> GetDownloadHistoricoByDocumentoIdAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        CancellationToken cancellationToken = default)
+    {
+        var downloadAcoes = new[] { "DownloadArquivo", "DownloadArquivoVersao" };
+
+        var query = _context.DocumentoHistoricos
+            .Include(historico => historico.Utilizador)
+            .Where(historico => historico.DocumentoId == documentoId);
+
+        if (string.IsNullOrWhiteSpace(acao))
+        {
+            query = query.Where(historico => downloadAcoes.Contains(historico.Acao));
+        }
+        else
+        {
+            query = query.Where(historico => historico.Acao == acao);
+        }
+
+        if (dataInicio.HasValue)
+        {
+            query = query.Where(historico => historico.DataAcao >= dataInicio.Value);
+        }
+
+        if (dataFim.HasValue)
+        {
+            var dataFimAjustada = dataFim.Value.TimeOfDay == TimeSpan.Zero
+                ? dataFim.Value.Date.AddDays(1).AddTicks(-1)
+                : dataFim.Value;
+
+            query = query.Where(historico => historico.DataAcao <= dataFimAjustada);
+        }
+
+        if (usuarioId.HasValue)
+        {
+            query = query.Where(historico => historico.UtilizadorId == usuarioId.Value);
+        }
+
+        return await query
+            .OrderByDescending(historico => historico.DataAcao)
+            .ThenByDescending(historico => historico.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

@@ -44,6 +44,27 @@ public class DocumentoController : ControllerBase
     }
 
     [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
+    [HttpGet("{id}/downloads")]
+    public async Task<ActionResult<DocumentoDownloadReportDto>> GetDownloadsReport(
+        int id,
+        [FromQuery] DateTime? dataInicio,
+        [FromQuery] DateTime? dataFim,
+        [FromQuery] int? usuarioId,
+        [FromQuery] string? acao,
+        CancellationToken cancellationToken)
+    {
+        var result = await _service.ObterRelatorioDownloadsAsync(
+            id,
+            dataInicio,
+            dataFim,
+            usuarioId,
+            acao,
+            cancellationToken);
+
+        return Ok(result);
+    }
+
+    [Authorize(Policy = AppPolicies.PodeConsultarDocumentos)]
     [HttpGet("{id}/anexos/{anexoId}/download")]
     public async Task<IActionResult> DownloadAnexo(int id, int anexoId, CancellationToken cancellationToken)
     {

@@ -22,4 +22,12 @@ public interface IDocumentoWorkflowRepository
     Task AddHistoricoAsync(DocumentoHistorico historico, CancellationToken cancellationToken = default);
 
     Task UpdateDocumentoAsync(Documento documento, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<DocumentoHistorico>> GetDownloadHistoricoByDocumentoIdAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        CancellationToken cancellationToken = default);
 }

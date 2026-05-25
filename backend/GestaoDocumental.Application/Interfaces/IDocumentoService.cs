@@ -37,4 +37,12 @@ public interface IDocumentoService
         int anexoId,
         int usuarioSistemaId,
         CancellationToken cancellationToken = default);
+
+    Task<DocumentoDownloadReportDto> ObterRelatorioDownloadsAsync(
+        int documentoId,
+        DateTime? dataInicio,
+        DateTime? dataFim,
+        int? usuarioId,
+        string? acao,
+        CancellationToken cancellationToken = default);
 }
