@@ -13,6 +13,8 @@ public class DocumentoService
       IDocumentoService
 {
     private const string UploadHistoricoAcao = "UploadArquivo";
+    private const string DownloadHistoricoAcao = "DownloadArquivo";
+    private const string DownloadVersaoHistoricoAcao = "DownloadArquivoVersao";
 
     private readonly IDocumentoWorkflowRepository _workflowRepository;
     private readonly IDocumentoAnexoRepository _anexoRepository;
@@ -113,6 +115,7 @@ public class DocumentoService
 
     public async Task<DocumentoDownloadResultDto?> DownloadArquivoAsync(
         int documentoId,
+        int usuarioSistemaId,
         CancellationToken cancellationToken = default)
     {
         var documento = await Repository.GetByIdAsync(documentoId);
@@ -122,7 +125,12 @@ public class DocumentoService
         }
 
         var anexo = await _anexoRepository.GetLatestByDocumentoIdAsync(documentoId, cancellationToken);
-        return await OpenAnexoDownloadAsync(anexo, cancellationToken);
+        return await DownloadAnexoComAuditoriaAsync(
+            documento,
+            anexo,
+            usuarioSistemaId,
+            DownloadHistoricoAcao,
+            cancellationToken);
     }
 
     public async Task<DocumentoAnexoListDto> ListarAnexosAsync(
@@ -183,6 +191,7 @@ public class DocumentoService
     public async Task<DocumentoDownloadResultDto?> DownloadAnexoAsync(
         int documentoId,
         int anexoId,
+        int usuarioSistemaId,
         CancellationToken cancellationToken = default)
     {
         var documento = await Repository.GetByIdAsync(documentoId);
@@ -196,7 +205,101 @@ public class DocumentoService
             anexoId,
             cancellationToken);
 
-        return await OpenAnexoDownloadAsync(anexo, cancellationToken);
+        return await DownloadAnexoComAuditoriaAsync(
+            documento,
+            anexo,
+            usuarioSistemaId,
+            DownloadVersaoHistoricoAcao,
+            cancellationToken);
+    }
+
+    private async Task<DocumentoDownloadResultDto?> DownloadAnexoComAuditoriaAsync(
+        Documento documento,
+        DocumentoAnexo? anexo,
+        int usuarioSistemaId,
+        string acao,
+        CancellationToken cancellationToken)
+    {
+        var result = await OpenAnexoDownloadAsync(anexo, cancellationToken);
+        if (result is null || anexo is null)
+        {
+            return null;
+        }
+
+        var versao = await ObterVersaoAnexoAsync(documento.Id, anexo.Id, cancellationToken);
+        var observacao = BuildObservacaoDownload(anexo, versao);
+
+        await RegistrarHistoricoDocumentoAsync(
+            documento,
+            usuarioSistemaId,
+            acao,
+            observacao,
+            cancellationToken);
+
+        return result;
+    }
+
+    private async Task RegistrarHistoricoDocumentoAsync(
+        Documento documento,
+        int usuarioSistemaId,
+        string acao,
+        string observacao,
+        CancellationToken cancellationToken)
+    {
+        var usuario = await _workflowRepository.GetUsuarioAsync(usuarioSistemaId, cancellationToken);
+        if (usuario is null || !usuario.Ativo || usuario.Bloqueado)
+        {
+            throw new UnauthorizedAccessException("Utilizador autenticado inválido.");
+        }
+
+        var agora = DateTime.UtcNow;
+
+        await _workflowRepository.AddHistoricoAsync(
+            new DocumentoHistorico
+            {
+                DocumentoId = documento.Id,
+                UtilizadorId = usuario.ColaboradorId ?? documento.ColaboradorCriadorId,
+                Acao = acao,
+                Observacao = observacao,
+                DataAcao = agora,
+                Ativo = true,
+                DataCriacao = agora
+            },
+            cancellationToken);
+
+        await UnitOfWork.SaveChangesAsync();
+    }
+
+    private static string BuildObservacaoDownload(DocumentoAnexo anexo, int? versao)
+    {
+        var partes = new List<string> { anexo.NomeOriginal, $"AnexoId={anexo.Id}" };
+
+        if (versao.HasValue)
+        {
+            partes.Add($"Versao={versao.Value}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(anexo.HashSha256))
+        {
+            partes.Add($"HashSha256={anexo.HashSha256}");
+        }
+
+        return string.Join(" | ", partes);
+    }
+
+    private async Task<int?> ObterVersaoAnexoAsync(
+        int documentoId,
+        int anexoId,
+        CancellationToken cancellationToken)
+    {
+        var anexos = await _anexoRepository.GetByDocumentoIdAsync(documentoId, cancellationToken);
+        var indice = anexos
+            .OrderBy(anexo => anexo.DataUpload)
+            .ThenBy(anexo => anexo.Id)
+            .Select((anexo, index) => new { anexo.Id, Versao = index + 1 })
+            .FirstOrDefault(item => item.Id == anexoId);
+
+        return indice?.Versao;
     }
 
     private async Task<DocumentoDownloadResultDto?> OpenAnexoDownloadAsync(

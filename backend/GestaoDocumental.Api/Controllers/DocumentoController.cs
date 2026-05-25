@@ -47,7 +47,11 @@ public class DocumentoController : ControllerBase
     [HttpGet("{id}/anexos/{anexoId}/download")]
     public async Task<IActionResult> DownloadAnexo(int id, int anexoId, CancellationToken cancellationToken)
     {
-        var result = await _service.DownloadAnexoAsync(id, anexoId, cancellationToken);
+        var result = await _service.DownloadAnexoAsync(
+            id,
+            anexoId,
+            GetUsuarioSistemaId(),
+            cancellationToken);
 
         if (result is null)
             return NotFound();
@@ -59,7 +63,10 @@ public class DocumentoController : ControllerBase
     [HttpGet("{id}/download")]
     public async Task<IActionResult> Download(int id, CancellationToken cancellationToken)
     {
-        var result = await _service.DownloadArquivoAsync(id, cancellationToken);
+        var result = await _service.DownloadArquivoAsync(
+            id,
+            GetUsuarioSistemaId(),
+            cancellationToken);
 
         if (result is null)
             return NotFound();

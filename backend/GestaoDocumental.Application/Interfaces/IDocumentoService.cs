@@ -25,6 +25,7 @@ public interface IDocumentoService
 
     Task<DocumentoDownloadResultDto?> DownloadArquivoAsync(
         int documentoId,
+        int usuarioSistemaId,
         CancellationToken cancellationToken = default);
 
     Task<DocumentoAnexoListDto> ListarAnexosAsync(
@@ -34,5 +35,6 @@ public interface IDocumentoService
     Task<DocumentoDownloadResultDto?> DownloadAnexoAsync(
         int documentoId,
         int anexoId,
+        int usuarioSistemaId,
         CancellationToken cancellationToken = default);
 }
