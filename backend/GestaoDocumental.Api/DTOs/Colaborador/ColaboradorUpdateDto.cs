@@ -27,4 +27,6 @@ public class ColaboradorUpdateDto
     public int EstadoId { get; set; }
 
     public int PerfilId { get; set; }
+
+    public int? DepartamentoId { get; set; }
 }

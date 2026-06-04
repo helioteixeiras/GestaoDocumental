@@ -6,7 +6,7 @@ public class DocumentoListDto
 
     public string NumeroDocumento { get; set; } = string.Empty;
 
-    public string Titulo { get; set; } = string.Empty;
+    public string Assunto { get; set; } = string.Empty;
 
     public int TipoDocumentoId { get; set; }
 

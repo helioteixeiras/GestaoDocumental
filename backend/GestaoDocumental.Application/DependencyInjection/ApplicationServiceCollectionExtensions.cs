@@ -15,6 +15,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddValidatorsFromAssemblyContaining<ClassificacaoDocumentoCreateDtoValidator>();
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICategoriaDocumentoService, CategoriaDocumentoService>();
         services.AddScoped<IClassificacaoDocumentoService, ClassificacaoDocumentoService>();
         services.AddScoped<IColaboradorService, ColaboradorService>();
         services.AddScoped<IUsuarioSistemaService, UsuarioSistemaService>();

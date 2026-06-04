@@ -14,6 +14,8 @@ public partial class GestaoDocumentalDbContext : DbContext
     {
     }
 
+    public virtual DbSet<CategoriaDocumento> CategoriaDocumentos { get; set; }
+
     public virtual DbSet<ClassificacaoDocumento> ClassificacaoDocumentos { get; set; }
 
     public virtual DbSet<Colaborador> Colaboradors { get; set; }
@@ -25,6 +27,8 @@ public partial class GestaoDocumentalDbContext : DbContext
     public virtual DbSet<Documento> Documentos { get; set; }
 
     public virtual DbSet<DocumentoAnexo> DocumentoAnexos { get; set; }
+
+    public virtual DbSet<DocumentoComentario> DocumentoComentarios { get; set; }
 
     public virtual DbSet<DocumentoHistorico> DocumentoHistoricos { get; set; }
 
@@ -59,13 +63,27 @@ public partial class GestaoDocumentalDbContext : DbContext
  
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CategoriaDocumento>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Categori__3214EC07B1E2CFC2");
+
+            entity.ToTable("CategoriaDocumento");
+
+            entity.HasIndex(e => e.Codigo, "UQ_CategoriaDocumento_Codigo").IsUnique();
+
+            entity.Property(e => e.Codigo).HasMaxLength(40);
+            entity.Property(e => e.Nome).HasMaxLength(100);
+            entity.Property(e => e.Ativo).HasDefaultValue(true);
+            entity.Property(e => e.DataCriacao).HasDefaultValueSql("(getdate())");
+        });
+
         modelBuilder.Entity<ClassificacaoDocumento>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Classifi__3214EC07029D907A");
 
             entity.ToTable("ClassificacaoDocumento");
 
-            entity.Property(e => e.Nome).HasMaxLength(80);
+            entity.Property(e => e.Nome).HasMaxLength(160);
         });
 
         modelBuilder.Entity<Colaborador>(entity =>
@@ -76,13 +94,17 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.HasIndex(e => e.NumDocumento, "UQ__Colabora__11150A80B24E655E").IsUnique();
 
-            entity.Property(e => e.Cargo).HasMaxLength(150);
+            entity.Property(e => e.Cargo).HasMaxLength(300);
             entity.Property(e => e.DataNascimento).HasColumnType("datetime");
-            entity.Property(e => e.Email).HasMaxLength(150);
-            entity.Property(e => e.Endereco).HasMaxLength(250);
-            entity.Property(e => e.Nome).HasMaxLength(150);
-            entity.Property(e => e.NumDocumento).HasMaxLength(50);
-            entity.Property(e => e.NumMecanografo).HasMaxLength(50);
+            entity.Property(e => e.Email).HasMaxLength(300);
+            entity.Property(e => e.Endereco).HasMaxLength(500);
+            entity.Property(e => e.Nome).HasMaxLength(300);
+            entity.Property(e => e.NumDocumento).HasMaxLength(100);
+            entity.Property(e => e.NumMecanografo).HasMaxLength(100);
+
+            entity.HasOne(d => d.Departamento).WithMany(p => p.Colaboradors)
+                .HasForeignKey(d => d.DepartamentoId)
+                .HasConstraintName("FK_Colaborador_Departamento");
 
             entity.HasOne(d => d.Estado).WithMany(p => p.Colaboradors)
                 .HasForeignKey(d => d.EstadoId)
@@ -119,8 +141,8 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("Departamento");
 
-            entity.Property(e => e.Nome).HasMaxLength(100);
-            entity.Property(e => e.Sigla).HasMaxLength(20);
+            entity.Property(e => e.Nome).HasMaxLength(200);
+            entity.Property(e => e.Sigla).HasMaxLength(40);
 
             entity.HasOne(d => d.Direcao).WithMany(p => p.Departamentos)
                 .HasForeignKey(d => d.DirecaoId)
@@ -134,8 +156,8 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("Direcao");
 
-            entity.Property(e => e.Nome).HasMaxLength(100);
-            entity.Property(e => e.Sigla).HasMaxLength(20);
+            entity.Property(e => e.Nome).HasMaxLength(200);
+            entity.Property(e => e.Sigla).HasMaxLength(40);
         });
 
         modelBuilder.Entity<Documento>(entity =>
@@ -146,17 +168,19 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.HasIndex(e => e.NumeroDocumento, "UQ__Document__A4202588CF4E8E6F").IsUnique();
 
-            entity.Property(e => e.CodigoArquivo).HasMaxLength(100);
+            entity.Property(e => e.Assunto).HasMaxLength(500);
+            entity.Property(e => e.CodigoArquivo).HasMaxLength(200);
             entity.Property(e => e.DataAtualizacao).HasColumnType("datetime");
             entity.Property(e => e.DataCriacao).HasColumnType("datetime");
             entity.Property(e => e.DataDocumento).HasColumnType("datetime");
             entity.Property(e => e.DataRecepcao).HasColumnType("datetime");
-            entity.Property(e => e.LocalizacaoFisica).HasMaxLength(250);
-            entity.Property(e => e.NumeroDocumento).HasMaxLength(100);
-            entity.Property(e => e.PalavrasChave).HasMaxLength(250);
+            entity.Property(e => e.Etiqueta).HasMaxLength(200);
+            entity.Property(e => e.LocalizacaoFisica).HasMaxLength(500);
+            entity.Property(e => e.NumeroDocumento).HasMaxLength(200);
+            entity.Property(e => e.PalavrasChave).HasMaxLength(500);
             entity.Property(e => e.PrazoResposta).HasColumnType("datetime");
-            entity.Property(e => e.ReferenciaExterna).HasMaxLength(150);
-            entity.Property(e => e.Titulo).HasMaxLength(250);
+            entity.Property(e => e.ReferenciaExterna).HasMaxLength(300);
+            entity.Property(e => e.ReferenciaInterna).HasMaxLength(200);
             entity.Property(e => e.VersaoAtual).HasDefaultValue(1);
 
             entity.HasOne(d => d.Classificacao).WithMany(p => p.Documentos)
@@ -186,7 +210,7 @@ public partial class GestaoDocumentalDbContext : DbContext
             entity.HasOne(d => d.TipoDocumento).WithMany(p => p.Documentos)
                 .HasForeignKey(d => d.TipoDocumentoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Documento__TipoD__5EBF139D");
+                .HasConstraintName("FK_Documento_TipoDocumento");
 
             entity.HasOne(d => d.UtilizadorAtualizacao).WithMany(p => p.DocumentoUtilizadorAtualizacaos)
                 .HasForeignKey(d => d.UtilizadorAtualizacaoId)
@@ -199,19 +223,39 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("DocumentoAnexo");
 
-            entity.Property(e => e.Caminho).HasMaxLength(500);
+            entity.Property(e => e.Caminho).HasMaxLength(1000);
             entity.Property(e => e.DataUpload).HasColumnType("datetime");
-            entity.Property(e => e.Extensao).HasMaxLength(20);
+            entity.Property(e => e.Extensao).HasMaxLength(40);
             entity.Property(e => e.HashSha256)
-                .HasMaxLength(500)
+                .HasMaxLength(1000)
                 .HasColumnName("HashSHA256");
-            entity.Property(e => e.NomeFisico).HasMaxLength(250);
-            entity.Property(e => e.NomeOriginal).HasMaxLength(250);
+            entity.Property(e => e.NomeFisico).HasMaxLength(500);
+            entity.Property(e => e.NomeOriginal).HasMaxLength(500);
 
             entity.HasOne(d => d.Documento).WithMany(p => p.DocumentoAnexos)
                 .HasForeignKey(d => d.DocumentoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Documento__Docum__656C112C");
+        });
+
+        modelBuilder.Entity<DocumentoComentario>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Document__3214EC072120C08B");
+
+            entity.ToTable("DocumentoComentario");
+
+            entity.Property(e => e.Comentario).HasMaxLength(2000);
+            entity.Property(e => e.Ativo).HasDefaultValue(true);
+            entity.Property(e => e.DataCriacao).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.Documento).WithMany(p => p.DocumentoComentarios)
+                .HasForeignKey(d => d.DocumentoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DocumentoComentario_Documento");
+
+            entity.HasOne(d => d.UsuarioSistema).WithMany(p => p.DocumentoComentarios)
+                .HasForeignKey(d => d.UsuarioSistemaId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<DocumentoHistorico>(entity =>
@@ -220,7 +264,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("DocumentoHistorico");
 
-            entity.Property(e => e.Acao).HasMaxLength(150);
+            entity.Property(e => e.Acao).HasMaxLength(300);
             entity.Property(e => e.DataAcao).HasColumnType("datetime");
 
             entity.HasOne(d => d.Documento).WithMany(p => p.DocumentoHistoricos)
@@ -240,7 +284,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("EstadoColaborador");
 
-            entity.Property(e => e.Nome).HasMaxLength(50);
+            entity.Property(e => e.Nome).HasMaxLength(100);
         });
 
         modelBuilder.Entity<EstadoDocumento>(entity =>
@@ -249,7 +293,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("EstadoDocumento");
 
-            entity.Property(e => e.Nome).HasMaxLength(50);
+            entity.Property(e => e.Nome).HasMaxLength(100);
         });
 
         modelBuilder.Entity<EstadoLogin>(entity =>
@@ -258,7 +302,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("EstadoLogin");
 
-            entity.Property(e => e.Nome).HasMaxLength(50);
+            entity.Property(e => e.Nome).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Fornecedor>(entity =>
@@ -267,14 +311,14 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("Fornecedor");
 
-            entity.Property(e => e.ContactoAlternativo).HasMaxLength(20);
-            entity.Property(e => e.ContactoPrincipal).HasMaxLength(20);
-            entity.Property(e => e.Email1).HasMaxLength(80);
-            entity.Property(e => e.Email2).HasMaxLength(80);
-            entity.Property(e => e.Endereco).HasMaxLength(250);
-            entity.Property(e => e.Nif).HasMaxLength(50);
-            entity.Property(e => e.Nome).HasMaxLength(150);
-            entity.Property(e => e.PontoFocal).HasMaxLength(80);
+            entity.Property(e => e.ContactoAlternativo).HasMaxLength(40);
+            entity.Property(e => e.ContactoPrincipal).HasMaxLength(40);
+            entity.Property(e => e.Email1).HasMaxLength(160);
+            entity.Property(e => e.Email2).HasMaxLength(160);
+            entity.Property(e => e.Endereco).HasMaxLength(500);
+            entity.Property(e => e.Nif).HasMaxLength(100);
+            entity.Property(e => e.Nome).HasMaxLength(300);
+            entity.Property(e => e.PontoFocal).HasMaxLength(160);
         });
 
         modelBuilder.Entity<Genero>(entity =>
@@ -283,7 +327,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("Genero");
 
-            entity.Property(e => e.Nome).HasMaxLength(50);
+            entity.Property(e => e.Nome).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Municipio>(entity =>
@@ -292,7 +336,11 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("Municipio");
 
-            entity.Property(e => e.Nome).HasMaxLength(80);
+            entity.Property(e => e.Nome).HasMaxLength(160);
+            entity.Property(e => e.Sigla).HasMaxLength(40);
+            entity.Property(e => e.CodigoINE).HasMaxLength(60);
+
+            entity.HasIndex(e => new { e.ProvinciaId, e.Nome }, "UX_Municipio_Provincia_Nome").IsUnique();
 
             entity.HasOne(d => d.Provincia).WithMany(p => p.Municipios)
                 .HasForeignKey(d => d.ProvinciaId)
@@ -304,7 +352,11 @@ public partial class GestaoDocumentalDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Pais__3214EC077903404E");
 
-            entity.Property(e => e.Nome).HasMaxLength(50);
+            entity.Property(e => e.Nome).HasMaxLength(100);
+            entity.Property(e => e.SiglaISO2).HasMaxLength(100);
+            entity.Property(e => e.CodigoIso3).HasMaxLength(100);
+            entity.Property(e => e.Capital).HasMaxLength(160);
+            entity.Property(e => e.IndicativoTelefonico).HasMaxLength(60);
         });
 
         modelBuilder.Entity<Perfil>(entity =>
@@ -313,7 +365,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("Perfil");
 
-            entity.Property(e => e.Nome).HasMaxLength(80);
+            entity.Property(e => e.Nome).HasMaxLength(160);
         });
 
         modelBuilder.Entity<PostoTrabalho>(entity =>
@@ -322,8 +374,8 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("PostoTrabalho");
 
-            entity.Property(e => e.Nome).HasMaxLength(100);
-            entity.Property(e => e.Sigla).HasMaxLength(20);
+            entity.Property(e => e.Nome).HasMaxLength(200);
+            entity.Property(e => e.Sigla).HasMaxLength(40);
 
             entity.HasOne(d => d.Departamento).WithMany(p => p.PostoTrabalhos)
                 .HasForeignKey(d => d.DepartamentoId)
@@ -340,7 +392,17 @@ public partial class GestaoDocumentalDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Provinci__3214EC0776531CA7");
 
-            entity.Property(e => e.Nome).HasMaxLength(60);
+            entity.Property(e => e.Nome).HasMaxLength(120);
+            entity.Property(e => e.Sigla).HasMaxLength(20);
+            entity.Property(e => e.CodigoINE).HasMaxLength(40);
+
+            entity.HasIndex(e => e.CodigoINE, "UQ_Provincia_CodigoINE")
+                .IsUnique()
+                .HasFilter("[CodigoINE] IS NOT NULL");
+
+            entity.HasIndex(e => e.Sigla, "UQ_Provincia_Sigla")
+                .IsUnique()
+                .HasFilter("[Sigla] IS NOT NULL");
 
             entity.HasOne(d => d.Pais).WithMany(p => p.Provincia)
                 .HasForeignKey(d => d.PaisId)
@@ -350,11 +412,24 @@ public partial class GestaoDocumentalDbContext : DbContext
 
         modelBuilder.Entity<TipoDocumento>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TipoDocu__3214EC07670A5546");
+            entity.HasKey(e => e.Id).HasName("PK_TipoDocumento");
 
             entity.ToTable("TipoDocumento");
 
-            entity.Property(e => e.Nome).HasMaxLength(100);
+            entity.HasIndex(e => e.Codigo, "UQ_TipoDocumento_Codigo").IsUnique();
+
+            entity.HasIndex(e => new { e.Nome, e.CategoriaDocumentoId }, "UQ_TipoDocumento_Nome_Categoria")
+                .IsUnique();
+
+            entity.Property(e => e.Codigo).HasMaxLength(60);
+            entity.Property(e => e.Nome).HasMaxLength(200);
+            entity.Property(e => e.Ativo).HasDefaultValue(true);
+            entity.Property(e => e.DataCriacao).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.CategoriaDocumento).WithMany(p => p.TipoDocumentos)
+                .HasForeignKey(d => d.CategoriaDocumentoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TipoDocumento_CategoriaDocumento");
         });
 
         modelBuilder.Entity<TipoDocumentoColaborador>(entity =>
@@ -363,7 +438,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("TipoDocumentoColaborador");
 
-            entity.Property(e => e.Nome).HasMaxLength(100);
+            entity.Property(e => e.Nome).HasMaxLength(200);
         });
 
         modelBuilder.Entity<TramitacaoDocumento>(entity =>
@@ -374,7 +449,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.Property(e => e.DataEnvio).HasColumnType("datetime");
             entity.Property(e => e.DataRececao).HasColumnType("datetime");
-            entity.Property(e => e.Estado).HasMaxLength(100);
+            entity.Property(e => e.Estado).HasMaxLength(200);
 
             entity.HasOne(d => d.ColaboradorDestino).WithMany(p => p.TramitacaoDocumentoColaboradorDestinos)
                 .HasForeignKey(d => d.ColaboradorDestinoId)
@@ -406,9 +481,7 @@ public partial class GestaoDocumentalDbContext : DbContext
 
             entity.ToTable("UsuarioSistema");
 
-            entity.HasIndex(e => e.ColaboradorId, "UQ__UsuarioS__28AA72205B486489")
-                .IsUnique()
-                .HasFilter("[ColaboradorId] IS NOT NULL");
+            entity.HasIndex(e => e.ColaboradorId, "UQ__UsuarioS__28AA72205B486489").IsUnique();
 
             entity.HasIndex(e => e.Username, "UQ__UsuarioS__536C85E4126F4AB7").IsUnique();
 
@@ -417,13 +490,14 @@ public partial class GestaoDocumentalDbContext : DbContext
             entity.Property(e => e.Ativo).HasDefaultValue(true);
             entity.Property(e => e.Bloqueado).HasDefaultValue(false);
             entity.Property(e => e.DataCriacao).HasColumnType("datetime");
-            entity.Property(e => e.Email).HasMaxLength(150);
-            entity.Property(e => e.PasswordHash).HasMaxLength(500);
+            entity.Property(e => e.Email).HasMaxLength(300);
+            entity.Property(e => e.PasswordHash).HasMaxLength(1000);
+            entity.Property(e => e.PasswordSalt).HasMaxLength(1000);
             entity.Property(e => e.TentativasLogin)
                 .HasColumnName("TentativasFalhadas")
                 .HasDefaultValue(0);
             entity.Property(e => e.UltimoLogin).HasColumnType("datetime");
-            entity.Property(e => e.Username).HasMaxLength(100);
+            entity.Property(e => e.Username).HasMaxLength(200);
 
             entity.HasOne(d => d.Colaborador).WithOne(p => p.UsuarioSistema)
                 .HasForeignKey<UsuarioSistema>(d => d.ColaboradorId)

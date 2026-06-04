@@ -5,4 +5,8 @@ public class ProvinciaUpdateDto
     public string Nome { get; set; } = string.Empty;
 
     public int PaisId { get; set; }
+
+    public string? Sigla { get; set; }
+
+    public string? CodigoINE { get; set; }
 }

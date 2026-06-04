@@ -180,11 +180,22 @@ public static class IdentityDataSeeder
         GestaoDocumentalDbContext context,
         ILogger logger)
     {
+        var categoriaDocumento = await context.CategoriaDocumentos
+            .OrderBy(item => item.Id)
+            .FirstAsync();
+
         await EnsureReferenceAsync(
             context,
             context.TipoDocumentos,
-            item => item.Nome == "Tipo Teste Auth",
-            () => new TipoDocumento { Nome = "Tipo Teste Auth", Ativo = true, DataCriacao = DateTime.UtcNow },
+            item => item.Codigo == "TIPO-TEST-AUTH",
+            () => new TipoDocumento
+            {
+                Codigo = "TIPO-TEST-AUTH",
+                Nome = "Tipo Teste Auth",
+                CategoriaDocumentoId = categoriaDocumento.Id,
+                Ativo = true,
+                DataCriacao = DateTime.UtcNow
+            },
             logger,
             "TipoDocumento");
 
@@ -252,7 +263,7 @@ public static class IdentityDataSeeder
         context.Documentos.Add(new Documento
         {
             NumeroDocumento = TestDocumentNumber,
-            Titulo = "Documento Teste Auth",
+            Assunto = "Documento Teste Auth",
             TipoDocumentoId = tipoDocumento.Id,
             ClassificacaoId = classificacao.Id,
             EstadoDocumentoId = estadoDocumento.Id,

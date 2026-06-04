@@ -44,7 +44,7 @@ public class DashboardDocumentoRecenteReadModel
 
     public string? CodigoArquivo { get; init; }
 
-    public string Titulo { get; init; } = string.Empty;
+    public string Assunto { get; init; } = string.Empty;
 
     public string EstadoAtual { get; init; } = string.Empty;
 

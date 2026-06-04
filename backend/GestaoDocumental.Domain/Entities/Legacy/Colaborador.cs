@@ -30,6 +30,10 @@ public partial class Colaborador : BaseEntity
 
     public int PerfilId { get; set; }
 
+    public int? DepartamentoId { get; set; }
+
+    public virtual Departamento? Departamento { get; set; }
+
     public virtual ICollection<Documento> DocumentoColaboradorCriadors { get; set; } = new List<Documento>();
 
     public virtual ICollection<DocumentoHistorico> DocumentoHistoricos { get; set; } = new List<DocumentoHistorico>();

@@ -12,5 +12,7 @@ public partial class Departamento : BaseEntity
 
     public virtual Direcao Direcao { get; set; } = null!;
 
+    public virtual ICollection<Colaborador> Colaboradors { get; set; } = new List<Colaborador>();
+
     public virtual ICollection<PostoTrabalho> PostoTrabalhos { get; set; } = new List<PostoTrabalho>();
 }

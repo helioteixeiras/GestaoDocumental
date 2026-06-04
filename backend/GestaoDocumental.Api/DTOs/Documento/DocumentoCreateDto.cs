@@ -4,7 +4,11 @@ public class DocumentoCreateDto
 {
     public string NumeroDocumento { get; set; } = string.Empty;
 
-    public string Titulo { get; set; } = string.Empty;
+    public string Assunto { get; set; } = string.Empty;
+
+    public string? ReferenciaInterna { get; set; }
+
+    public string? Etiqueta { get; set; }
 
     public string? Descricao { get; set; }
 

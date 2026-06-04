@@ -10,7 +10,7 @@ public class DashboardDocumentoRecenteDto
 
     public string? CodigoArquivo { get; set; }
 
-    public string Titulo { get; set; } = string.Empty;
+    public string Assunto { get; set; } = string.Empty;
 
     public string EstadoAtual { get; set; } = string.Empty;
 

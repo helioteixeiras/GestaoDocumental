@@ -10,6 +10,8 @@ public partial class UsuarioSistema : BaseEntity
 
     public string PasswordHash { get; set; } = null!;
 
+    public string? PasswordSalt { get; set; }
+
     public string Email { get; set; } = null!;
 
     public int PerfilId { get; set; }
@@ -27,4 +29,6 @@ public partial class UsuarioSistema : BaseEntity
     public virtual Perfil Perfil { get; set; } = null!;
 
     public virtual EstadoLogin EstadoLogin { get; set; } = null!;
+
+    public virtual ICollection<DocumentoComentario> DocumentoComentarios { get; set; } = new List<DocumentoComentario>();
 }

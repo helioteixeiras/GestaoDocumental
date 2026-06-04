@@ -1,16 +1,12 @@
-﻿namespace GestaoDocumental.Api.DTOs.Municipio;
+namespace GestaoDocumental.Api.DTOs.CategoriaDocumento;
 
-public class MunicipioDetailsDto
+public class CategoriaDocumentoDetailsDto
 {
     public int Id { get; set; }
 
     public string Nome { get; set; } = string.Empty;
 
-    public int ProvinciaId { get; set; }
-
-    public string? Sigla { get; set; }
-
-    public string? CodigoINE { get; set; }
+    public string Codigo { get; set; } = string.Empty;
 
     public bool Ativo { get; set; }
 

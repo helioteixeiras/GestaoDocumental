@@ -5,4 +5,6 @@ public class PaisListDto
     public int Id { get; set; }
 
     public string Nome { get; set; } = string.Empty;
+
+    public string? SiglaISO2 { get; set; }
 }

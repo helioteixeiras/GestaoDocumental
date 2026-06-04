@@ -7,4 +7,6 @@ public class ProvinciaListDto
     public string Nome { get; set; } = string.Empty;
 
     public int PaisId { get; set; }
+
+    public string? Sigla { get; set; }
 }

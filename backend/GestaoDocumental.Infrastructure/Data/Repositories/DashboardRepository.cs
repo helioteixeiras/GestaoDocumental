@@ -61,7 +61,7 @@ public class DashboardRepository : IDashboardRepository
                 NumeroDocumento = documento.NumeroDocumento,
                 ReferenciaExterna = documento.ReferenciaExterna,
                 CodigoArquivo = documento.CodigoArquivo,
-                Titulo = documento.Titulo,
+                Assunto = documento.Assunto,
                 EstadoAtual = documento.EstadoDocumento.Nome,
                 DataCriacao = documento.DataCriacao
             })

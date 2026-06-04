@@ -6,7 +6,7 @@ public partial class Documento : BaseEntity
 {
     public string NumeroDocumento { get; set; } = null!;
 
-    public string Titulo { get; set; } = null!;
+    public string Assunto { get; set; } = null!;
 
     public string? Descricao { get; set; }
 
@@ -30,6 +30,8 @@ public partial class Documento : BaseEntity
 
     public string? ReferenciaExterna { get; set; }
 
+    public string? ReferenciaInterna { get; set; }
+
     public string? PalavrasChave { get; set; }
 
     public string? Observacao { get; set; }
@@ -42,6 +44,8 @@ public partial class Documento : BaseEntity
 
     public int? UtilizadorAtualizacaoId { get; set; }
 
+    public string? Etiqueta { get; set; }
+
     public virtual ClassificacaoDocumento Classificacao { get; set; } = null!;
 
     public virtual Colaborador ColaboradorCriador { get; set; } = null!;
@@ -49,6 +53,8 @@ public partial class Documento : BaseEntity
     public virtual Direcao DirecaoOrigem { get; set; } = null!;
 
     public virtual ICollection<DocumentoAnexo> DocumentoAnexos { get; set; } = new List<DocumentoAnexo>();
+
+    public virtual ICollection<DocumentoComentario> DocumentoComentarios { get; set; } = new List<DocumentoComentario>();
 
     public virtual ICollection<DocumentoHistorico> DocumentoHistoricos { get; set; } = new List<DocumentoHistorico>();
 

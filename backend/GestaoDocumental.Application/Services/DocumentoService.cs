@@ -728,7 +728,7 @@ public class DocumentoService
             {
                 DocumentoId = workflow.Documento.Id,
                 NumeroDocumento = workflow.Documento.NumeroDocumento,
-                Titulo = workflow.Documento.Titulo,
+                Assunto = workflow.Documento.Assunto,
                 EstadoAtual = workflow.Documento.EstadoDocumento.Nome,
                 DataCriacao = workflow.Documento.DataCriacao,
                 TotalTramitacoes = listaTramitacoes.Count,

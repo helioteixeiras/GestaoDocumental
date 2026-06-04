@@ -63,7 +63,7 @@ public class DashboardService : IDashboardService
             NumeroDocumento = item.NumeroDocumento,
             ReferenciaExterna = item.ReferenciaExterna,
             CodigoArquivo = item.CodigoArquivo,
-            Titulo = item.Titulo,
+            Assunto = item.Assunto,
             EstadoAtual = item.EstadoAtual,
             DataCriacao = item.DataCriacao
         };

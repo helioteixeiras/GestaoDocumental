@@ -8,6 +8,10 @@ public partial class Provincia : BaseEntity
 
     public int PaisId { get; set; }
 
+    public string? Sigla { get; set; }
+
+    public string? CodigoINE { get; set; }
+
     public virtual ICollection<Municipio> Municipios { get; set; } = new List<Municipio>();
 
     public virtual Pais Pais { get; set; } = null!;
