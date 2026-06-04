@@ -1,52 +1,90 @@
-.app-container {
-    display: flex;
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
+.sidenav-container {
+  height: 100vh;
+}
+
+.sidenav {
+  width: 280px;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.sidenav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px 12px;
+}
+
+.brand-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: var(--mat-sys-primary);
+}
+
+.brand-title {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.nav-list {
+  padding-top: 0;
+}
+
+.nav-group-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+a.nav-item-active {
+  background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+  color: var(--mat-sys-primary);
+}
+
+a.nav-item-active mat-icon {
+  color: var(--mat-sys-primary);
+}
+
+.sidenav-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--mat-sys-surface-container-lowest, #f5f5f5);
+}
+
+.top-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.toolbar-title {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.menu-toggle {
+  margin-right: 8px;
+}
+
+.page-content {
+  flex: 1;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 960px) {
+  .menu-toggle {
+    display: none;
   }
-  
-  .sidebar {
-    width: 240px;
-    background: #1f2937;
-    color: white;
-    padding: 20px;
-  }
-  
-  .sidebar h2 {
-    margin-bottom: 30px;
-  }
-  
-  .sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .sidebar a {
-    color: white;
-    text-decoration: none;
-    padding: 10px;
-    border-radius: 6px;
-  }
-  
-  .sidebar a:hover {
-    background: #374151;
-  }
-  
-  .main-content {
-    flex: 1;
-    background: #f3f4f6;
-  }
-  
-  .topbar {
-    height: 60px;
-    background: white;
-    display: flex;
-    align-items: center;
-    padding: 0 24px;
-    border-bottom: 1px solid #e5e7eb;
-    font-weight: bold;
-  }
-  
-  .page-content {
-    padding: 24px;
-  }
+}

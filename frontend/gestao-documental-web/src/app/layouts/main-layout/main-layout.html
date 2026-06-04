@@ -1,22 +1,55 @@
-<div class="app-container">
-    <aside class="sidebar">
-      <h2>GestãoDoc</h2>
-  
-      <nav>
-        <a routerLink="/dashboard">Dashboard</a>
-        <a routerLink="/documentos">Documentos</a>
-        <a routerLink="/colaboradores">Colaboradores</a>
-        <a routerLink="/workflow">Workflow</a>
-      </nav>
-    </aside>
-  
-    <main class="main-content">
-      <header class="topbar">
-        <span>Sistema de Gestão Documental</span>
-      </header>
-  
-      <section class="page-content">
-        <router-outlet />
-      </section>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    #drawer
+    class="sidenav"
+    mode="side"
+    opened
+    fixedInViewport
+    [disableClose]="true"
+  >
+    <div class="sidenav-brand">
+      <mat-icon class="brand-icon" aria-hidden="true">folder_shared</mat-icon>
+      <div>
+        <span class="brand-title">GestãoDoc</span>
+        <span class="brand-subtitle">Gestão Documental</span>
+      </div>
+    </div>
+
+    <mat-nav-list class="nav-list" aria-label="Menu principal">
+      @for (group of navGroups; track group.title) {
+        <h3 matSubheader class="nav-group-title">{{ group.title }}</h3>
+
+        @for (item of group.items; track item.route) {
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive="nav-item-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="sidenav-content">
+    <mat-toolbar color="primary" class="top-toolbar">
+      <button
+        matIconButton
+        type="button"
+        class="menu-toggle"
+        aria-label="Alternar menu"
+        (click)="toggleDrawer()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="toolbar-title">{{ appTitle }}</span>
+    </mat-toolbar>
+
+    <main class="page-content">
+      <router-outlet />
     </main>
-  </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
