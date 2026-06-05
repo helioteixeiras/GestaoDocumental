@@ -37,6 +37,45 @@ public class GenericRepository<T> : IGenericRepository<T>
         _dbSet.Update(entity);
     }
 
+    public void ApplyScalarValues(T existing, T source)
+    {
+        DetachDuplicateTrackedInstances(existing.Id, existing);
+
+        var entry = _context.Entry(existing);
+
+        foreach (var property in entry.Properties)
+        {
+            if (property.Metadata.IsPrimaryKey())
+                continue;
+
+            if (property.Metadata.Name is nameof(BaseEntity.DataCriacao))
+                continue;
+
+            if (property.Metadata.IsForeignKey())
+                continue;
+
+            var propertyInfo = property.Metadata.PropertyInfo;
+            if (propertyInfo is null)
+                continue;
+
+            property.CurrentValue = propertyInfo.GetValue(source);
+        }
+    }
+
+    private void DetachDuplicateTrackedInstances(int id, T keepTracked)
+    {
+        foreach (var trackedEntry in _context.ChangeTracker.Entries<T>().ToList())
+        {
+            if (trackedEntry.Entity.Id != id)
+                continue;
+
+            if (ReferenceEquals(trackedEntry.Entity, keepTracked))
+                continue;
+
+            trackedEntry.State = EntityState.Detached;
+        }
+    }
+
     public void Delete(T entity)
     {
         _dbSet.Remove(entity);

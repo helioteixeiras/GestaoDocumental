@@ -42,9 +42,14 @@ public class GenericService<T> : IGenericService<T> where T : BaseEntity
         if (existing is null)
             return false;
 
-        entity.Id = id;
+        var dataCriacao = existing.DataCriacao;
 
-        Repository.Update(entity);
+        entity.Id = id;
+        Repository.ApplyScalarValues(existing, entity);
+
+        existing.DataCriacao = dataCriacao;
+        existing.DataAtualizacao = DateTime.UtcNow;
+
         await UnitOfWork.SaveChangesAsync();
 
         return true;

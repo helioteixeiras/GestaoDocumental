@@ -7,3 +7,39 @@ body {
 body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
+.app-confirm-dialog-panel .mat-mdc-dialog-surface {
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+}
+
+.app-notification-panel {
+  margin-top: 1rem;
+  margin-right: 1rem;
+}
+
+.app-notification-panel .mdc-snackbar__surface {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  padding: 0.5rem 0.75rem;
+}
+
+.app-notification-panel--success .mdc-snackbar__surface {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.app-notification-panel--error .mdc-snackbar__surface {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.app-notification-panel--info .mdc-snackbar__surface {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.app-notification-panel--warning .mdc-snackbar__surface {
+  background: #fff3e0;
+  color: #e65100;
+}

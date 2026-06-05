@@ -8,5 +8,6 @@ public interface IGenericRepository<T> where T : BaseEntity
     Task<IReadOnlyList<T>> GetAllAsync();
     Task AddAsync(T entity);
     void Update(T entity);
+    void ApplyScalarValues(T existing, T source);
     void Delete(T entity);
 }

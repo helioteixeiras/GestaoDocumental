@@ -1,0 +1,112 @@
+<mat-card appearance="outlined" class="page-card">
+  <mat-card-header class="page-header">
+    <div class="page-header-text">
+      <mat-card-title>Tipos de Documento</mat-card-title>
+      <mat-card-subtitle>Gestão de tipos de documento</mat-card-subtitle>
+    </div>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="openCreateDialog()"
+      [disabled]="loading() || !hasCategoriasAtivas()"
+    >
+      <mat-icon>add</mat-icon>
+      Novo tipo
+    </button>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="toolbar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Pesquisar</mat-label>
+        <input matInput [formControl]="searchControl" placeholder="Código ou nome" />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Categoria</mat-label>
+        <mat-select [formControl]="categoriaFilterControl">
+          <mat-option [value]="null">Todas</mat-option>
+          @for (categoria of categoriasFiltro(); track categoria.id) {
+            <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    @if (!hasCategoriasAtivas() && !loading()) {
+      <p class="hint-message">
+        Não existem categorias activas. Crie ou active uma categoria antes de adicionar tipos de documento.
+      </p>
+    }
+
+    @if (loading()) {
+      <div class="loading-row" aria-live="polite">
+        <mat-spinner diameter="36"></mat-spinner>
+        <span>A carregar tipos de documento...</span>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="filteredTipos()" class="data-table">
+          <ng-container matColumnDef="codigo">
+            <th mat-header-cell *matHeaderCellDef>Código</th>
+            <td mat-cell *matCellDef="let row">{{ row.codigo }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="categoria">
+            <th mat-header-cell *matHeaderCellDef>Categoria</th>
+            <td mat-cell *matCellDef="let row">{{ row.categoriaDocumentoNome }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dataCriacao">
+            <th mat-header-cell *matHeaderCellDef>Criação</th>
+            <td mat-cell *matCellDef="let row">{{ row.dataCriacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef class="actions-header">Acções</th>
+            <td mat-cell *matCellDef="let row" class="actions-cell">
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Editar tipo de documento"
+                matTooltip="Editar"
+                (click)="openEditDialog(row)"
+                [disabled]="loading()"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="ativo">
+            <th mat-header-cell *matHeaderCellDef class="state-header">Estado</th>
+            <td mat-cell *matCellDef="let row" class="state-cell">
+              <mat-slide-toggle
+                [checked]="row.ativo"
+                (change)="onToggleAtivo(row, $event.checked)"
+                [disabled]="loading()"
+                matTooltip="Activar ou desativar tipo de documento"
+              >
+                {{ row.ativo ? 'Activo' : 'Inactivo' }}
+              </mat-slide-toggle>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+
+        @if (filteredTipos().length === 0) {
+          <p class="empty-message">Nenhum tipo de documento encontrado.</p>
+        }
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

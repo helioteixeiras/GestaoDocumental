@@ -8,10 +8,18 @@ public class TipoDocumentoService
     : GenericService<TipoDocumento>,
       ITipoDocumentoService
 {
+    private readonly ITipoDocumentoRepository _tipoDocumentoRepository;
+
     public TipoDocumentoService(
-        IGenericRepository<TipoDocumento> repository,
+        ITipoDocumentoRepository repository,
         IUnitOfWork unitOfWork)
         : base(repository, unitOfWork)
     {
+        _tipoDocumentoRepository = repository;
+    }
+
+    public override async Task<IReadOnlyList<TipoDocumento>> GetAllAsync()
+    {
+        return await _tipoDocumentoRepository.GetAllWithCategoriaAsync();
     }
 }

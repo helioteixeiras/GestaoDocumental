@@ -73,6 +73,16 @@ a.nav-item-active mat-icon {
   font-weight: 500;
 }
 
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar-user {
+  margin-right: 8px;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
 .menu-toggle {
   margin-right: 8px;
 }

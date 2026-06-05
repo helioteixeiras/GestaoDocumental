@@ -1,0 +1,20 @@
+<div class="confirm-dialog" [class]="'confirm-dialog--' + tone()">
+  <div class="confirm-dialog__icon-wrap" aria-hidden="true">
+    <mat-icon class="confirm-dialog__icon">{{ icon() }}</mat-icon>
+  </div>
+
+  <h2 class="confirm-dialog__title">{{ data.title }}</h2>
+  <p class="confirm-dialog__message">{{ data.message }}</p>
+
+  <div class="confirm-dialog__actions">
+    <button mat-button type="button" (click)="cancel()">{{ cancelLabel() }}</button>
+    <button
+      mat-flat-button
+      type="button"
+      [color]="tone() === 'default' ? 'primary' : 'warn'"
+      (click)="confirm()"
+    >
+      {{ confirmLabel() }}
+    </button>
+  </div>
+</div>

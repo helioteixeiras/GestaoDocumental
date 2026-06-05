@@ -14,6 +14,7 @@ public static class InfrastructureServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<ITipoDocumentoRepository, TipoDocumentoRepository>();
         services.AddScoped<IUsuarioSistemaRepository, UsuarioSistemaRepository>();
         services.AddScoped<IDocumentoAnexoRepository, DocumentoAnexoRepository>();
         services.AddScoped<IDocumentoWorkflowRepository, DocumentoWorkflowRepository>();
